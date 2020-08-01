@@ -100,12 +100,11 @@ class MainWindow(QDialog):
         super().__init__(parent)
 
         self.setWindowTitle(APP_NAME)
-        self.setFixedSize(APP_MAIN_WINDOW_WIDTH, APP_MAIN_WINDOW_HEIGHT)
-        # self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowContextHelpButtonHint)
+        self.setMinimumSize(APP_MAIN_WINDOW_WIDTH, APP_MAIN_WINDOW_HEIGHT)
         self.setWindowIcon(self._icon_from_base63(APP_ICON))
-
         self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
+        self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
         self._layout = QVBoxLayout(self)
         self._games_list = QListWidget()
