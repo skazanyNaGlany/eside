@@ -46,6 +46,15 @@ DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = """
 [global]
 
+[emulator.epsxe]
+system_name = Sony PlayStation
+emulator_name = EPSXE
+exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe
+run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
+roms_paths = psx, roms\psx, D:\games\psx
+rom_name_remove =
+roms_extensions = cue, img, iso
+
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
@@ -86,7 +95,7 @@ class Emulator:
         self.run_pattern = run_pattern.strip()
         self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
         self.rom_name_remove = rom_name_remove.strip()
-        self.roms_extensions = roms_extensions.strip()
+        self.roms_extensions = roms_extensions.strip().split(',')
 
 
     def _get_roms_path(self) -> str:
@@ -115,21 +124,45 @@ class Emulator:
         roms_path = self._get_roms_path()
         roms = {}
 
-        with os.scandir(roms_path) as it:
-            for entry in it:
-                if not entry.name.startswith('.') and entry.is_file():
-                    name = entry.name
+        files = list(os.scandir(roms_path))
 
-                    if not name.endswith('.iso'):
-                        continue
+        for iextension in self.roms_extensions:
+            iextension = iextension.strip()
 
-                    if name.lower().endswith('.iso'):
-                        name = name[:-4]
+            iextension_full = '.' + iextension
+            iextension_full_len = len(iextension_full)
 
-                    if self.rom_name_remove and re.match(self.rom_name_remove, name) is not None:
-                        roms[entry.path] = name[12:]    # todo
-                    else:
-                        roms[entry.path] = name
+            for ifile in files:
+                if ifile.name.startswith('.') or not ifile.is_file():
+                    continue
+
+                lower_name = ifile.name.lower()
+
+                if not lower_name.endswith(iextension_full):
+                    continue
+
+                name = ifile.name[:iextension_full_len * -1]
+
+                if self.rom_name_remove:
+                    name = re.sub(self.rom_name_remove, '', name)
+
+                roms[ifile.path] = name
+
+        # with os.scandir(roms_path) as it:
+        #     for entry in it:
+        #         if not entry.name.startswith('.') and entry.is_file():
+        #             name = entry.name
+
+        #             if not name.endswith('.iso'):
+        #                 continue
+
+        #             if name.lower().endswith('.iso'):
+        #                 name = name[:-4]
+
+        #             if self.rom_name_remove and re.match(self.rom_name_remove, name) is not None:
+        #                 roms[entry.path] = name[12:]    # todo
+        #             else:
+        #                 roms[entry.path] = name
 
         return {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
 
@@ -173,17 +206,25 @@ class MainWindow(QDialog):
         self._layout.addWidget(self._settings_button)
         self._layout.addWidget(self._exit_button)
 
+        self._config = self._parse_config()
+        self._emulators = self._load_emulators()
+
+        self._show_emulators()
+        self._show_current_emulator_roms(True)
+
+        self._emu_selector.currentIndexChanged.connect(self._emu_selector_current_index_changed)
+
         self._games_list.doubleClicked.connect(self._games_list_double_clicked)
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
 
         self._exit_button.clicked.connect(self._exit_button_clicked)
         self._refresh_list_button.clicked.connect(self._refresh_list_button_clicked)
 
-        self._config = self._parse_config()
-        self._emulators = self._load_emulators()
+        # self._config = self._parse_config()
+        # self._emulators = self._load_emulators()
 
-        self._show_emulators()
-        self._show_current_emulator_roms(True)
+        # self._show_emulators()
+        # self._show_current_emulator_roms(True)
 
 
     def _show_emulators(self):
@@ -289,13 +330,20 @@ class MainWindow(QDialog):
                 current_emulator = self._get_current_emulator()
 
                 if current_emulator:
-                    current_emulator.run_rom(self._get_rom_by_index(current_index.row()))
+                    rom_path = self._get_rom_by_index(current_index.row())
+
+                    print('Running rom: ' + rom_path)
+                    current_emulator.run_rom(rom_path)
         except Exception as x:
             self._log_exception(x)
 
 
     def _games_list_double_clicked(self):
         self._run_selected_game()
+
+
+    def _emu_selector_current_index_changed(self, index):
+        self._show_current_emulator_roms(True)
 
 
     def _run_game_button_clicked(self):
