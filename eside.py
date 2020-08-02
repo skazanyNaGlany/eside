@@ -162,7 +162,25 @@ class Emulator:
                 # if self.rom_name_remove:
                 #     name = re.sub(self.rom_name_remove, '', name)
 
-                roms[ifile.path] = name
+                roms[ifile.path] = name.strip()
+
+        # append (2) (3) (4) etc. to duplicated names
+        roms_values = list(roms.values())
+        for ientry in roms.copy():
+            name = roms[ientry]
+            ientry_count = roms_values.count(name)
+
+            if ientry_count > 1:
+                counter = 1
+
+                for ientry2 in roms:
+                    if roms[ientry2] == name:
+                        if counter > 1:
+                            roms[ientry2] = name + ' (' + str(counter) + ')'
+
+                        counter += 1
+
+
 
         # with os.scandir(roms_path) as it:
         #     for entry in it:
