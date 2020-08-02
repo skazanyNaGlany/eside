@@ -48,11 +48,12 @@ DEFAULT_CONFIG = """
 
 [emulator.epsxe]
 system_name = Sony PlayStation
-emulator_name = EPSXE
+emulator_name = ePSXe
 exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe
 run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
 roms_paths = psx, roms\psx, D:\games\psx
-rom_name_remove =
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 roms_extensions = cue, img, iso
 
 [emulator.pcsx2]
@@ -61,7 +62,9 @@ emulator_name = PCSX2
 exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe
 run_pattern = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
 roms_paths = ps2, roms\ps2, D:\games\ps2
-rom_name_remove = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
+rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
+rom_name_remove1 = \[[^\]]*\]
+rom_name_remove2 = \(.*\)
 roms_extensions = iso
 """
 
@@ -86,16 +89,20 @@ class Emulator:
         exe_paths: str,
         run_pattern: str,
         roms_paths: str,
-        rom_name_remove: str,
-        roms_extensions: str
+        roms_extensions: str,
+        **kwargs
     ):
         self.system_name = system_name.strip()
         self.emulator_name = emulator_name.strip()
         self.exe_paths = exe_paths.strip().replace('\\', os.sep).split(',')
         self.run_pattern = run_pattern.strip()
         self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
-        self.rom_name_remove = rom_name_remove.strip()
+        self.rom_name_remove = []
         self.roms_extensions = roms_extensions.strip().split(',')
+
+        for ikey in kwargs:
+            if ikey.startswith('rom_name_remove'):
+                self.rom_name_remove.append(kwargs[ikey].strip())
 
 
     def _get_roms_path(self) -> str:
@@ -133,6 +140,9 @@ class Emulator:
             iextension_full_len = len(iextension_full)
 
             for ifile in files:
+                if ifile.path in roms:
+                    continue
+
                 if ifile.name.startswith('.') or not ifile.is_file():
                     continue
 
@@ -143,8 +153,14 @@ class Emulator:
 
                 name = ifile.name[:iextension_full_len * -1]
 
-                if self.rom_name_remove:
-                    name = re.sub(self.rom_name_remove, '', name)
+                for ire in self.rom_name_remove:
+                    if not ire:
+                        continue
+
+                    name = re.sub(ire, '', name)
+
+                # if self.rom_name_remove:
+                #     name = re.sub(self.rom_name_remove, '', name)
 
                 roms[ifile.path] = name
 
