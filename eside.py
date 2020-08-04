@@ -359,10 +359,10 @@ class MainWindow(QDialog):
 
 
     def _log_exception(self, x: Exception):
-        x_str = str(x)
+        x_str = str(type(x).__name__) + ': ' + str(x)
 
         traceback.print_tb(x.__traceback__)
-        print('Exception: ' + x_str)
+        print(x_str)
 
         self._message_box(x_str)
 
