@@ -72,7 +72,7 @@ roms_extensions = iso
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
-exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp\ppsspp
+exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
 run_pattern = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
 roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
