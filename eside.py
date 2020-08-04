@@ -8,6 +8,9 @@ import base64
 import traceback
 import shlex
 
+import warnings
+warnings.simplefilter('ignore', UserWarning)
+
 from typeguard import typechecked
 from typing import Optional
 
