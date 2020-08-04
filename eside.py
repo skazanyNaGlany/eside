@@ -46,7 +46,7 @@ DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
 show_non_roms_emulator=0
-show_non_exe_emulator=1
+show_non_exe_emulator=0
 
 [emulator.epsxe]
 system_name = Sony PlayStation
