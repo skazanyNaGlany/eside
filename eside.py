@@ -46,6 +46,7 @@ DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
 show_non_roms_emulator=0
+show_non_exe_emulator=1
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -127,14 +128,14 @@ class Emulator:
         return None
 
 
-    def _get_exe_path(self) -> Optional[str]:
+    def get_emulator_executable(self) -> Optional[str]:
         for ipath in self.exe_paths:
             ipath = ipath.strip()
 
             if os.path.exists(ipath):
                 return ipath
 
-        return self.exe_paths[0].strip()
+        return None
 
 
     def get_emulator_roms(self) -> Optional[dict]:
@@ -215,7 +216,11 @@ class Emulator:
 
 
     def run_rom(self, rom_path: str) -> subprocess:
-        exe_path = self._get_exe_path()
+        exe_path = self.get_emulator_executable()
+
+        if not exe_path:
+            raise Exception('No emulator found')
+
         run_command = self.run_pattern.format(exe_path = exe_path, rom_path = rom_path)
         args = shlex.split(run_command)
 
@@ -286,7 +291,10 @@ class MainWindow(QDialog):
 
     def _load_emulators(self) -> list:
         global_section_data = dict(self._config['global'].items())
+
         show_non_roms_emulator = global_section_data['show_non_roms_emulator'] == '1'
+        show_non_exe_emulator = global_section_data['show_non_exe_emulator'] == '1'
+
         emulators = []
 
         for isection_name in self._config.sections():
@@ -295,6 +303,11 @@ class MainWindow(QDialog):
 
             isection_data = dict(self._config[isection_name].items())
             iemulator = Emulator(**isection_data)
+
+            if not show_non_exe_emulator:
+                # check if emulator executable exists
+                if not iemulator.get_emulator_executable():
+                    continue
 
             if not show_non_roms_emulator:
                 # check if emulator have roms
