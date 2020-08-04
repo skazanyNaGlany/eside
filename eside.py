@@ -12,12 +12,12 @@ from typeguard import typechecked
 from typing import Optional
 
 from PySide2.QtWidgets import ( # pylint: disable=no-name-in-module
-    QApplication, 
-    QDialog, 
-    QLineEdit, 
-    QPushButton, 
-    QVBoxLayout, 
-    QListWidget, 
+    QApplication,
+    QDialog,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QListWidget,
     QLabel,
     QComboBox,
     QMessageBox
@@ -116,7 +116,7 @@ class Emulator:
                 self.rom_name_remove.append(kwargs[ikey].strip())
 
 
-    def _get_roms_path(self) -> str:
+    def _get_roms_path(self) -> Optional[str]:
         for ipath in self.roms_paths:
             ipath = ipath.strip()
 
@@ -127,7 +127,7 @@ class Emulator:
         return self.roms_paths[0].strip()
 
 
-    def _get_exe_path(self) -> str:
+    def _get_exe_path(self) -> Optional[str]:
         for ipath in self.exe_paths:
             ipath = ipath.strip()
 
