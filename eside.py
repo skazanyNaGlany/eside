@@ -7,6 +7,7 @@ import subprocess
 import base64
 import traceback
 import shlex
+import pathlib
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -132,11 +133,23 @@ class Emulator:
 
 
     def get_emulator_executable(self) -> Optional[str]:
+        home_dir = pathlib.Path.home()
+
         for ipath in self.exe_paths:
             ipath = ipath.strip()
 
             if os.path.exists(ipath):
                 return ipath
+
+            home_ipath = os.path.join(home_dir, ipath)
+
+            if os.path.exists(home_ipath):
+                return home_ipath
+
+            home_systems_ipath = os.path.join(home_dir, 'systems', ipath)
+
+            if os.path.exists(home_systems_ipath):
+                return home_systems_ipath
 
         return None
 
