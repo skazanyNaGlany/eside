@@ -403,7 +403,7 @@ class MainWindow(QDialog):
                 current_emulator = self._get_current_emulator()
 
                 if current_emulator:
-                    rom_path = self._get_rom_by_index(current_index.row())
+                    rom_path = os.path.abspath(self._get_rom_by_index(current_index.row()))
 
                     print('Running rom: ' + rom_path)
                     current_emulator.run_rom(rom_path)
