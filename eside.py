@@ -336,7 +336,7 @@ class MainWindow(QDialog):
 
             self._roms = self._get_current_emulator().get_emulator_roms()
 
-            for path, name in self._roms.items():
+            for name in self._roms.values():
                 self._games_list.addItem(name)
 
             if first_run:
