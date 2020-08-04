@@ -376,12 +376,10 @@ class MainWindow(QDialog):
 
 
     def _log_exception(self, x: Exception):
-        x_str = str(type(x).__name__) + ': ' + str(x)
-
         traceback.print_tb(x.__traceback__)
-        print(x_str)
+        print(str(type(x).__name__) + ': ' + str(x))
 
-        self._message_box(x_str)
+        self._message_box(str(x))
 
 
     def _run_selected_game(self):
