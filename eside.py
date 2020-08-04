@@ -51,7 +51,7 @@ show_non_exe_emulator=1
 [emulator.epsxe]
 system_name = Sony PlayStation
 emulator_name = ePSXe
-exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe
+exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe, epsxe_64/epsxe_x64, epsxe/epsxe_x64, epsxe/ePSXe
 run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 rom_name_remove0 = \[[^\]]*\]
