@@ -43,15 +43,15 @@ APP_ICON = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACcElEQVRYR+1WP2/TUBD/
 APP_MAIN_WINDOW_WIDTH = 480
 APP_MAIN_WINDOW_HEIGHT = 600
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
-DEFAULT_CONFIG = """
+DEFAULT_CONFIG = r"""
 [global]
 
 [emulator.epsxe]
 system_name = Sony PlayStation
 emulator_name = ePSXe
-exe_paths = D:\\games\\epsxe\\ePSXe.exe, epsxe\\ePSXe.exe
+exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe
 run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
-roms_paths = psx, roms\\psx, D:\\games\\psx, D:\\games\\roms\\psx
+roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 roms_extensions = cue, img, iso
@@ -59,9 +59,9 @@ roms_extensions = cue, img, iso
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
-exe_paths = C:\\Program Files (x86)\\PCSX2\\pcsx2.exe, pcsx2\\pcsx2.exe
+exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe
 run_pattern = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
-roms_paths = ps2, roms\\ps2, D:\\games\\ps2, D:\\games\\roms\\ps2
+roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
@@ -70,9 +70,9 @@ roms_extensions = iso
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
-exe_paths = C:\\Program Files\\PPSSPP\\PPSSPPWindows.exe, ppsspp\\ppsspp
+exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp\ppsspp
 run_pattern = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
-roms_paths = psp, roms\\psp, D:\\games\\psp, D:\\games\\roms\\psp
+roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
