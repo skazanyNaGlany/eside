@@ -295,6 +295,37 @@ class MainWindow(QDialog):
         # self._show_current_emulator_roms(True)
 
 
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Left:
+            self._switch_emulator(False)
+        elif event.key() == Qt.Key_Right:
+            self._switch_emulator(True)
+        else:
+            super(MainWindow, self).keyPressEvent(event)
+
+
+    def _switch_emulator(self, down: bool):
+        emu_count = self._emu_selector.count()
+
+        if emu_count <= 0:
+            return
+
+        current_index = self._emu_selector.currentIndex()
+
+        if not down:
+            current_index -= 1
+
+            if current_index < 0:
+                current_index = emu_count - 1
+        else:
+            current_index += 1
+
+            if current_index >= emu_count:
+                current_index = 0
+
+        self._emu_selector.setCurrentIndex(current_index)
+
+
     def _show_emulators(self):
         self._emu_selector.clear()
 
