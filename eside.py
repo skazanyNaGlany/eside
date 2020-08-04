@@ -61,7 +61,7 @@ roms_extensions = cue, img, iso
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
-exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe
+exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe, PCSX2/PCSX2
 run_pattern = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
 roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
