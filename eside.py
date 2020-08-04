@@ -45,6 +45,7 @@ APP_MAIN_WINDOW_HEIGHT = 600
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
+show_non_roms_emulator=0
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -123,8 +124,7 @@ class Emulator:
             if os.path.exists(ipath):
                 return ipath
 
-        # this will throw exception if path does not exists
-        return self.roms_paths[0].strip()
+        return None
 
 
     def _get_exe_path(self) -> Optional[str]:
@@ -134,13 +134,15 @@ class Emulator:
             if os.path.exists(ipath):
                 return ipath
 
-        # this will throw exception if executable does not exists
         return self.exe_paths[0].strip()
 
 
-    def get_emulator_roms(self) -> dict:
+    def get_emulator_roms(self) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
+
+        if not roms_path:
+            return None
 
         files = list(os.scandir(roms_path))
 
@@ -283,6 +285,8 @@ class MainWindow(QDialog):
 
 
     def _load_emulators(self) -> list:
+        global_section_data = dict(self._config['global'].items())
+        show_non_roms_emulator = global_section_data['show_non_roms_emulator'] == '1'
         emulators = []
 
         for isection_name in self._config.sections():
@@ -290,8 +294,13 @@ class MainWindow(QDialog):
                 continue
 
             isection_data = dict(self._config[isection_name].items())
-
             iemulator = Emulator(**isection_data)
+
+            if not show_non_roms_emulator:
+                # check if emulator have roms
+                if not iemulator.get_emulator_roms():
+                    continue
+
             emulators.append(iemulator)
 
         return emulators
@@ -334,7 +343,15 @@ class MainWindow(QDialog):
         try:
             self._games_list.clear()
 
+            emulator = self._get_current_emulator()
+
+            if not emulator:
+                return
+
             self._roms = self._get_current_emulator().get_emulator_roms()
+
+            if not self._roms:
+                return
 
             for name in self._roms.values():
                 self._games_list.addItem(name)
