@@ -60,7 +60,7 @@ run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = cue, img, iso
+roms_extensions = cue, ccd, img, iso, bin
 
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
@@ -100,6 +100,8 @@ def typechecked_class_decorator(exclude=None):
 
 @typechecked_class_decorator()
 class Emulator:
+    CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
+
     def __init__(self,
         system_name: str,
         emulator_name: str,
@@ -132,6 +134,32 @@ class Emulator:
         return None
 
 
+    def _file_extract_lines(self, filename: str) -> list:
+        lines = []
+
+        for iline in open(filename, 'r').readlines():
+            lines.append(iline)
+
+        return lines
+
+
+    def _get_cue_bins(self, cue_pathname: str) -> list:
+        bins = []
+
+        for iline in self._file_extract_lines(cue_pathname):
+            iline = iline.strip()
+
+            match = re.findall(Emulator.CUE_BIN_RE_SIGN, iline)
+
+            if len(match) == 1:
+                bin_filename = match[0]
+
+                if bin_filename not in bins:
+                    bins.append(bin_filename)
+
+        return bins
+
+
     def get_emulator_executable(self) -> Optional[str]:
         home_dir = pathlib.Path.home()
 
@@ -157,6 +185,7 @@ class Emulator:
     def get_emulator_roms(self) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
+        to_skip = []
 
         if not roms_path:
             return None
@@ -182,6 +211,17 @@ class Emulator:
                     continue
 
                 name = ifile.name[:iextension_full_len * -1]
+
+                if iextension == 'cue':
+                    to_skip = list(set(to_skip) | set(self._get_cue_bins(ifile.path)))
+                elif iextension == 'ccd':
+                    img_filename = name + '.img'
+
+                    if img_filename not in to_skip:
+                        to_skip.append(img_filename)
+
+                if ifile.name in to_skip:
+                    continue
 
                 for ire in self.rom_name_remove:
                     if not ire:
