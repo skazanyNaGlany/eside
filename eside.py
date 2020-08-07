@@ -118,6 +118,7 @@ class Emulator:
         self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
         self.rom_name_remove = []
         self.roms_extensions = roms_extensions.strip().split(',')
+        self._cached_roms = None
 
         for ikey in kwargs:
             if ikey.startswith('rom_name_remove'):
@@ -182,10 +183,13 @@ class Emulator:
         return None
 
 
-    def get_emulator_roms(self) -> Optional[dict]:
+    def get_emulator_roms(self, cached: bool = True) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
         to_skip = []
+
+        if cached and self._cached_roms is not None:
+            return self._cached_roms
 
         if not roms_path:
             return None
@@ -250,25 +254,8 @@ class Emulator:
 
                         counter += 1
 
-
-
-        # with os.scandir(roms_path) as it:
-        #     for entry in it:
-        #         if not entry.name.startswith('.') and entry.is_file():
-        #             name = entry.name
-
-        #             if not name.endswith('.iso'):
-        #                 continue
-
-        #             if name.lower().endswith('.iso'):
-        #                 name = name[:-4]
-
-        #             if self.rom_name_remove and re.match(self.rom_name_remove, name) is not None:
-        #                 roms[entry.path] = name[12:]    # todo
-        #             else:
-        #                 roms[entry.path] = name
-
-        return {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
+        self._cached_roms = {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
+        return self._cached_roms
 
 
     def run_rom(self, rom_path: str) -> subprocess:
@@ -439,7 +426,7 @@ class MainWindow(QDialog):
         return self._emulators[current_index]
 
 
-    def _show_current_emulator_roms(self, first_run:bool = False):
+    def _show_current_emulator_roms(self, first_run:bool = False, cached:bool = True):
         try:
             self._games_list.clear()
 
@@ -448,7 +435,7 @@ class MainWindow(QDialog):
             if not emulator:
                 return
 
-            self._roms = self._get_current_emulator().get_emulator_roms()
+            self._roms = self._get_current_emulator().get_emulator_roms(cached)
 
             if not self._roms:
                 return
@@ -472,7 +459,7 @@ class MainWindow(QDialog):
 
 
     def _refresh_list_button_clicked(self):
-        self._show_current_emulator_roms()
+        self._show_current_emulator_roms(cached=False)
 
 
     def _log_exception(self, x: Exception):
