@@ -299,7 +299,7 @@ class MainWindow(QDialog):
 
         self.setWindowTitle(APP_NAME)
         self.setMinimumSize(APP_MAIN_WINDOW_WIDTH, APP_MAIN_WINDOW_HEIGHT)
-        self.setWindowIcon(self._icon_from_base63(APP_ICON))
+        self.setWindowIcon(self._icon_from_base64(APP_ICON))
         self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
@@ -517,7 +517,7 @@ class MainWindow(QDialog):
         self._run_selected_game()
 
 
-    def _icon_from_base63(self, base64_str:str):
+    def _icon_from_base64(self, base64_str:str):
         pixmap = QtGui.QPixmap()
         pixmap.loadFromData(base64.b64decode(base64_str))
         icon = QtGui.QIcon(pixmap)
