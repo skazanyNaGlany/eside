@@ -478,7 +478,10 @@ class MainWindow(QDialog):
             self._message_box(str(x))
 
 
-    def _get_rom_by_index(self, index: int) -> str:
+    def _get_rom_by_index(self, index: int) -> Optional[str]:
+        if not self._roms:
+            return None
+
         return list(self._roms.keys())[index]
 
 
@@ -505,10 +508,15 @@ class MainWindow(QDialog):
                 current_emulator = self._get_current_emulator()
 
                 if current_emulator:
-                    rom_path = os.path.abspath(self._get_rom_by_index(current_index.row()))
+                    rom_path = self._get_rom_by_index(current_index.row())
 
-                    print('Running rom: ' + rom_path)
-                    current_emulator.run_rom(rom_path)
+                    if not rom_path:
+                        return
+
+                    rom_full_path = os.path.abspath(rom_path)
+
+                    print('Running rom: ' + rom_full_path)
+                    current_emulator.run_rom(rom_full_path)
         except Exception as x:
             self._log_exception(x)
 
