@@ -24,7 +24,8 @@ from PySide2.QtWidgets import ( # pylint: disable=no-name-in-module
     QListWidget,
     QLabel,
     QComboBox,
-    QMessageBox
+    QMessageBox,
+    QListWidgetItem
 )
 from PySide2 import QtCore, QtGui
 from PySide2.QtCore import Qt           # pylint: disable=no-name-in-module
@@ -468,8 +469,11 @@ class MainWindow(QDialog):
             if not self._roms:
                 return
 
-            for name in self._roms.values():
-                self._games_list.addItem(name)
+            for pathname, name in self._roms.items():
+                item = QListWidgetItem(name)
+                item.setToolTip(pathname)
+
+                self._games_list.addItem(item)
 
             if first_run:
                 self._games_list.setCurrentRow(0)
