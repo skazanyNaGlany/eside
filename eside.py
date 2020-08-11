@@ -141,6 +141,7 @@ class Emulator:
         self.rom_name_remove = []
         self.roms_extensions = roms_extensions.strip().split(',')
         self._cached_roms = None
+        self._cached_exe_pathname = None
 
         for ikey in kwargs:
             if ikey.startswith('rom_name_remove'):
@@ -183,26 +184,35 @@ class Emulator:
         return bins
 
 
-    def get_emulator_executable(self) -> Optional[str]:
+    def get_emulator_executable(self, cached: bool = True) -> Optional[str]:
+        if cached and self._cached_exe_pathname is not None:
+            return self._cached_exe_pathname
+
         home_dir = pathlib.Path.home()
+        exe_pathname = None
 
         for ipath in self.exe_paths:
             ipath = ipath.strip()
 
             if os.path.exists(ipath):
-                return ipath
+                exe_pathname = ipath
+                break
 
             home_ipath = os.path.join(home_dir, ipath)
 
             if os.path.exists(home_ipath):
-                return home_ipath
+                exe_pathname = home_ipath
+                break
 
             home_systems_ipath = os.path.join(home_dir, 'systems', ipath)
 
             if os.path.exists(home_systems_ipath):
-                return home_systems_ipath
+                exe_pathname = home_systems_ipath
+                break
 
-        return None
+        self._cached_exe_pathname = exe_pathname
+
+        return exe_pathname
 
 
     def get_emulator_roms(self, cached: bool = True) -> Optional[dict]:
