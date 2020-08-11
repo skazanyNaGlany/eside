@@ -386,16 +386,38 @@ class MainWindow(QDialog):
                 current_index = 0
 
         self._emu_selector.setCurrentIndex(current_index)
+        self._update_current_emulator_tooltip()
+
+
+    def _format_emulator_name(self, iemulator:Emulator) -> str:
+        return '{system_name} ({emulator_name}) [{roms_count}]'.format(
+            system_name = iemulator.system_name,
+            emulator_name = iemulator.emulator_name,
+            roms_count = len(iemulator.get_emulator_roms())
+        )
+
+
+    def _update_current_emulator_tooltip(self):
+        current_index = self._emu_selector.currentIndex()
+
+        if current_index <= -1:
+            return None
+
+        exe_pathname = self._emulators[current_index].get_emulator_executable()
+
+        if exe_pathname:
+            self._emu_selector.setToolTip(exe_pathname)
+        else:
+            self._emu_selector.setToolTip('')
 
 
     def _show_emulators(self):
         self._emu_selector.clear()
 
         for iemulator in self._emulators:
-            self._emu_selector.addItem('{system_name} ({emulator_name})'.format(
-                system_name = iemulator.system_name,
-                emulator_name = iemulator.emulator_name
-            ))
+            self._emu_selector.addItem(self._format_emulator_name(iemulator))
+
+        self._update_current_emulator_tooltip()
 
 
     def _load_emulators(self) -> list:
@@ -541,6 +563,7 @@ class MainWindow(QDialog):
 
     def _emu_selector_current_index_changed(self, index):
         self._show_current_emulator_roms(True)
+        self._update_current_emulator_tooltip()
 
 
     def _run_game_button_clicked(self):
