@@ -121,7 +121,7 @@ roms_extensions = wud, wux, iso, wad
 [emulator.redream]
 system_name = Sega Dreamcast
 emulator_name = Redream
-exe_paths = D:\games\redream\redream.exe, redream\redream.exe
+exe_paths = D:\games\redream\redream.exe, redream\redream.exe, redream\redream
 run_pattern = "{exe_path}" "{rom_path}"
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
 rom_name_remove0 = \[[^\]]*\]
