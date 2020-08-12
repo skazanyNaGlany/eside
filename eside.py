@@ -319,7 +319,8 @@ class Emulator:
         if not exe_path:
             self._raise_no_exe_exception()
 
-        args = shlex.split(exe_path)
+        run_command = '"{exe_path}"'.format(exe_path=exe_path)
+        args = shlex.split(run_command)
 
         self._running_rom = subprocess.Popen(args)
 
