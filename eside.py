@@ -117,6 +117,16 @@ roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 roms_extensions = wud, wux, iso, wad
+
+[emulator.redream]
+system_name = Sega Dreamcast
+emulator_name = Redream
+exe_paths = D:\games\redream\redream.exe, redream\redream.exe
+run_pattern = "{exe_path}" "{rom_path}"
+roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = cdi, chd, gdi
 """
 
 
