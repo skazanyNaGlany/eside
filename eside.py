@@ -52,7 +52,7 @@ DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
 show_non_roms_emulator=0
-show_non_exe_emulator=0
+show_non_exe_emulator=1
 show_emulator_name=0
 show_emulator_roms_count=0
 
@@ -186,6 +186,13 @@ class Emulator:
         return bins
 
 
+    def _raise_no_exe_exception(self):
+        raise Exception('No emulator executable for {system_name} ({emulator_name}) found'.format(
+            system_name=self.system_name,
+            emulator_name=self.emulator_name
+        ))
+
+
     def get_emulator_executable(self, cached: bool = True) -> Optional[str]:
         if cached and self._cached_exe_pathname is not None:
             return self._cached_exe_pathname
@@ -296,10 +303,23 @@ class Emulator:
         exe_path = self.get_emulator_executable()
 
         if not exe_path:
-            raise Exception('No emulator found')
+            self._raise_no_exe_exception()
 
         run_command = self.run_pattern.format(exe_path = exe_path, rom_path = rom_path)
         args = shlex.split(run_command)
+
+        self._running_rom = subprocess.Popen(args)
+
+        return self._running_rom
+
+
+    def run_gui(self) -> subprocess:
+        exe_path = self.get_emulator_executable()
+
+        if not exe_path:
+            self._raise_no_exe_exception()
+
+        args = shlex.split(exe_path)
 
         self._running_rom = subprocess.Popen(args)
 
@@ -322,6 +342,7 @@ class MainWindow(QDialog):
         self._emu_selector = QComboBox()
         self._games_list = QListWidget()
         self._run_game_button = QPushButton('Run selected game')
+        self._run_emulator_gui_button = QPushButton('Run emulator GUI')
         self._refresh_list_button = QPushButton('Refresh list')
         self._settings_button = QPushButton('Settings')
         self._about_button = QPushButton('About')
@@ -332,6 +353,7 @@ class MainWindow(QDialog):
         self._layout.addWidget(self._emu_selector)
         self._layout.addWidget(self._games_list)
         self._layout.addWidget(self._run_game_button)
+        self._layout.addWidget(self._run_emulator_gui_button)
         self._layout.addWidget(self._refresh_list_button)
         self._layout.addWidget(self._settings_button)
         self._layout.addWidget(self._about_button)
@@ -349,6 +371,7 @@ class MainWindow(QDialog):
 
         self._games_list.doubleClicked.connect(self._games_list_double_clicked)
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
+        self._run_emulator_gui_button.clicked.connect(self._run_emulator_gui_button_clicked)
         self._about_button.clicked.connect(self._about_button_clicked)
 
         self._exit_button.clicked.connect(self._exit_button_clicked)
@@ -580,6 +603,16 @@ class MainWindow(QDialog):
 
     def _run_game_button_clicked(self):
         self._run_selected_game()
+
+
+    def _run_emulator_gui_button_clicked(self):
+        try:
+            current_emulator = self._get_current_emulator()
+
+            if current_emulator:
+                current_emulator.run_gui()
+        except Exception as x:
+            self._log_exception(x)
 
 
     def _about_button_clicked(self):
