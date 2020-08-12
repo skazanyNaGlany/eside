@@ -51,10 +51,10 @@ APP_URL = 'https://github.com/skazanyNaGlany/eside'
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
-show_non_roms_emulator=0
+show_non_roms_emulator=1
 show_non_exe_emulator=1
-show_emulator_name=0
-show_emulator_roms_count=0
+show_emulator_name=1
+show_emulator_roms_count=1
 
 [emulator.epsxe]
 system_name = Sony PlayStation
