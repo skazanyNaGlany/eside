@@ -53,6 +53,8 @@ DEFAULT_CONFIG = r"""
 [global]
 show_non_roms_emulator=0
 show_non_exe_emulator=0
+show_emulator_name=0
+show_emulator_roms_count=0
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -336,6 +338,8 @@ class MainWindow(QDialog):
         self._layout.addWidget(self._exit_button)
 
         self._config = self._parse_config()
+        self._config_global_section = dict(self._config['global'].items())
+
         self._emulators = self._load_emulators()
 
         self._show_emulators()
@@ -390,11 +394,21 @@ class MainWindow(QDialog):
 
 
     def _format_emulator_name(self, iemulator:Emulator) -> str:
-        return '{system_name} ({emulator_name}) [{roms_count}]'.format(
-            system_name = iemulator.system_name,
-            emulator_name = iemulator.emulator_name,
-            roms_count = len(iemulator.get_emulator_roms())
-        )
+        show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
+        show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
+
+        formatted_name = '{system_name}'.format(system_name=iemulator.system_name)
+
+        if show_emulator_name or show_emulator_roms_count:
+            formatted_name += '     '
+
+        if show_emulator_name:
+            formatted_name += ' ({emulator_name})'.format(emulator_name=iemulator.emulator_name)
+
+        if show_emulator_roms_count:
+            formatted_name += ' [{roms_count}]'.format(roms_count=len(iemulator.get_emulator_roms()))
+
+        return formatted_name
 
 
     def _update_current_emulator_tooltip(self):
@@ -421,10 +435,8 @@ class MainWindow(QDialog):
 
 
     def _load_emulators(self) -> list:
-        global_section_data = dict(self._config['global'].items())
-
-        show_non_roms_emulator = global_section_data['show_non_roms_emulator'] == '1'
-        show_non_exe_emulator = global_section_data['show_non_exe_emulator'] == '1'
+        show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
+        show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
 
         emulators = []
 
