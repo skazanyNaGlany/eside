@@ -284,9 +284,6 @@ class Emulator:
 
                     name = re.sub(ire, '', name)
 
-                # if self.rom_name_remove:
-                #     name = re.sub(self.rom_name_remove, '', name)
-
                 roms[ifile.path] = name.strip()
 
         # append (2) (3) (4) etc. to duplicated names
@@ -388,11 +385,7 @@ class MainWindow(QDialog):
         self._exit_button.clicked.connect(self._exit_button_clicked)
         self._refresh_list_button.clicked.connect(self._refresh_list_button_clicked)
 
-        # self._config = self._parse_config()
-        # self._emulators = self._load_emulators()
-
-        # self._show_emulators()
-        # self._show_current_emulator_roms(True)
+        self._adjust_gui()
 
 
     def keyPressEvent(self, event):
@@ -427,20 +420,28 @@ class MainWindow(QDialog):
         self._update_current_emulator_tooltip()
 
 
+    def _adjust_gui(self):
+        show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
+        show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
+
+        if show_emulator_name or show_emulator_roms_count:
+            self._emu_selector.setFont(QtGui.QFont('Terminal', 10))
+
+
     def _format_emulator_name(self, iemulator:Emulator) -> str:
         show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
         show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
 
-        formatted_name = '{system_name}'.format(system_name=iemulator.system_name)
-
         if show_emulator_name or show_emulator_roms_count:
-            formatted_name += '     '
+            formatted_name = '{system_name:<50}'.format(system_name=iemulator.system_name)
 
-        if show_emulator_name:
-            formatted_name += ' ({emulator_name})'.format(emulator_name=iemulator.emulator_name)
+            if show_emulator_name:
+                formatted_name += '{emulator_name:<10}'.format(emulator_name=iemulator.emulator_name)
 
-        if show_emulator_roms_count:
-            formatted_name += ' [{roms_count}]'.format(roms_count=len(iemulator.get_emulator_roms()))
+            if show_emulator_roms_count:
+                formatted_name += '{roms_count}'.format(roms_count = len(iemulator.get_emulator_roms()))
+        else:
+            formatted_name = '{system_name}'.format(system_name=iemulator.system_name)
 
         return formatted_name
 
