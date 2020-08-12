@@ -107,6 +107,16 @@ roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 roms_extensions = iso
+
+[emulator.cemu]
+system_name = Nintendo Wii U
+emulator_name = Cemu
+exe_paths = D:\games\cemu\Cemu.exe, cemu\Cemu.exe
+run_pattern = "{exe_path}" -f -g "{rom_path}"
+roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = wud, wux, iso, wad
 """
 
 
