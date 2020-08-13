@@ -10,6 +10,7 @@ import shlex
 import pathlib
 import shutil
 import operator
+import pathlib
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -120,7 +121,7 @@ run_pattern = "{exe_path}" -f -g "{rom_path}"
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = wud, wux, iso, wad
+roms_extensions = wud, wux, iso, wad, rpx
 
 [emulator.redream]
 system_name = Sega Dreamcast
@@ -289,7 +290,7 @@ class Emulator:
         if not roms_path:
             return None
 
-        files = list(os.scandir(roms_path))
+        files = list(pathlib.Path(roms_path).rglob('*.*'))
 
         for iextension in self.roms_extensions:
             iextension = iextension.strip()
@@ -298,23 +299,28 @@ class Emulator:
             iextension_full_len = len(iextension_full)
 
             for ifile in files:
-                if ifile.path in roms:
+                ifile_pathname = str(ifile)
+
+                if ifile_pathname in roms:
                     continue
 
                 if ifile.name.startswith('.') or not ifile.is_file():
                     continue
 
-                lower_name = ifile.name.lower()
+                lower_filename = ifile.name.lower()
 
-                if not lower_name.endswith(iextension_full):
+                if not lower_filename.endswith(iextension_full):
                     continue
 
-                name = ifile.name[:iextension_full_len * -1]
+                clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
+
+                if clean_name.endswith(iextension_full):
+                    clean_name = clean_name[:iextension_full_len * -1]
 
                 if iextension == 'cue':
-                    to_skip = list(set(to_skip) | set(self._get_cue_bins(ifile.path)))
+                    to_skip = list(set(to_skip) | set(self._get_cue_bins(ifile_pathname)))
                 elif iextension == 'ccd':
-                    img_filename = name + '.img'
+                    img_filename = clean_name + '.img'
 
                     if img_filename not in to_skip:
                         to_skip.append(img_filename)
@@ -326,9 +332,9 @@ class Emulator:
                     if not ire:
                         continue
 
-                    name = re.sub(ire, '', name)
+                    clean_name = re.sub(ire, '', clean_name)
 
-                roms[ifile.path] = name.strip()
+                roms[ifile_pathname] = clean_name.strip()
 
         # append (2) (3) (4) etc. to duplicated names
         roms_values = list(roms.values())
