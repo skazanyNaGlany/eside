@@ -430,9 +430,11 @@ class MainWindow(QDialog):
 
 
     def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Left:
+        key = event.key()
+
+        if key == Qt.Key_Left:
             self._switch_emulator(False)
-        elif event.key() == Qt.Key_Right:
+        elif key == Qt.Key_Right:
             self._switch_emulator(True)
         else:
             super(MainWindow, self).keyPressEvent(event)
