@@ -9,6 +9,7 @@ import traceback
 import shlex
 import pathlib
 import shutil
+import operator
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -56,6 +57,7 @@ show_non_roms_emulator=1
 show_non_exe_emulator=1
 show_emulator_name=0
 show_emulator_roms_count=0
+sort_emulators=1
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -499,6 +501,7 @@ class MainWindow(QDialog):
     def _load_emulators(self) -> list:
         show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
         show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
+        sort_emulators = self._config_global_section['sort_emulators'] == '1'
 
         emulators = []
 
@@ -520,6 +523,9 @@ class MainWindow(QDialog):
                     continue
 
             emulators.append(iemulator)
+
+        if sort_emulators:
+            emulators = sorted(emulators, key=operator.attrgetter('system_name'))
 
         return emulators
 
