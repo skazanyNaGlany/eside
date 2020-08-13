@@ -147,6 +147,27 @@ def typechecked_class_decorator(exclude=None):
 
 
 @typechecked_class_decorator()
+class Utils:
+    @staticmethod
+    def file_write_lines(filename: str, lines: list, cr_lf: bool = True):
+        ending = '\r\n' if cr_lf else '\n'
+        processed_lines = ending.join([iline.strip()  for iline in lines]) + ending
+
+        with open(filename, 'w', newline='') as f:
+            f.write(processed_lines)
+
+
+    @staticmethod
+    def file_extract_lines(filename: str) -> list:
+        lines = []
+
+        for iline in open(filename, 'r').readlines():
+            lines.append(iline)
+
+        return lines
+
+
+@typechecked_class_decorator()
 class Emulator:
     CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
 
@@ -186,19 +207,10 @@ class Emulator:
         return None
 
 
-    def _file_extract_lines(self, filename: str) -> list:
-        lines = []
-
-        for iline in open(filename, 'r').readlines():
-            lines.append(iline)
-
-        return lines
-
-
     def _get_cue_bins(self, cue_pathname: str) -> list:
         bins = []
 
-        for iline in self._file_extract_lines(cue_pathname):
+        for iline in Utils.file_extract_lines(cue_pathname):
             iline = iline.strip()
 
             match = re.findall(Emulator.CUE_BIN_RE_SIGN, iline)
@@ -384,18 +396,16 @@ class MainWindow(QDialog):
         self._run_game_button = QPushButton('Run selected game')
         self._run_emulator_gui_button = QPushButton('Run emulator GUI')
         self._refresh_list_button = QPushButton('Refresh list')
-        self._settings_button = QPushButton('Settings')
+        self._config_button = QPushButton('Configuration')
         self._about_button = QPushButton('About')
         self._exit_button = QPushButton('Exit')
-
-        self._settings_button.setDisabled(True)
 
         self._layout.addWidget(self._emu_selector)
         self._layout.addWidget(self._games_list)
         self._layout.addWidget(self._run_game_button)
         self._layout.addWidget(self._run_emulator_gui_button)
         self._layout.addWidget(self._refresh_list_button)
-        self._layout.addWidget(self._settings_button)
+        self._layout.addWidget(self._config_button)
         self._layout.addWidget(self._about_button)
         self._layout.addWidget(self._exit_button)
 
@@ -408,12 +418,11 @@ class MainWindow(QDialog):
         self._show_current_emulator_roms(True)
 
         self._emu_selector.currentIndexChanged.connect(self._emu_selector_current_index_changed)
-
         self._games_list.doubleClicked.connect(self._games_list_double_clicked)
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
         self._run_emulator_gui_button.clicked.connect(self._run_emulator_gui_button_clicked)
         self._about_button.clicked.connect(self._about_button_clicked)
-
+        self._config_button.clicked.connect(self._config_button_clicked)
         self._exit_button.clicked.connect(self._exit_button_clicked)
         self._refresh_list_button.clicked.connect(self._refresh_list_button_clicked)
 
@@ -679,6 +688,24 @@ class MainWindow(QDialog):
         '''.format(APP_NAME=APP_NAME, APP_URL=APP_URL)
 
         self._message_box(msg, False)
+
+
+    def _config_button_clicked(self):
+        target_config_pathname = os.path.join(os.getcwd(), DEFAULT_CONFIG_PATHNAME)
+
+        if not os.path.exists(DEFAULT_CONFIG_PATHNAME):
+            try:
+                Utils.file_write_lines(
+                    DEFAULT_CONFIG_PATHNAME,
+                    DEFAULT_CONFIG.strip().splitlines(False)
+                )
+
+                self._message_box('Configuration file written to ' + target_config_pathname, False)
+            except:
+                self._message_box('Cannot write configuration file to ' + target_config_pathname, True)
+                return
+
+        os.system(target_config_pathname)
 
 
     def _icon_from_base64(self, base64_str:str):
