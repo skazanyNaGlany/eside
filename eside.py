@@ -8,6 +8,7 @@ import base64
 import traceback
 import shlex
 import pathlib
+import shutil
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -219,25 +220,41 @@ class Emulator:
 
         home_dir = pathlib.Path.home()
         exe_pathname = None
+        already_checked = []
 
         for ipath in self.exe_paths:
             ipath = ipath.strip()
 
+            # just search in path provided in config
             if os.path.exists(ipath):
                 exe_pathname = ipath
                 break
 
+            # search in dome directory
             home_ipath = os.path.join(home_dir, ipath)
 
             if os.path.exists(home_ipath):
                 exe_pathname = home_ipath
                 break
 
+            # search in home + /systems/ directory
             home_systems_ipath = os.path.join(home_dir, 'systems', ipath)
 
             if os.path.exists(home_systems_ipath):
                 exe_pathname = home_systems_ipath
                 break
+
+            # search in system's PATH
+            ipath_basename = os.path.basename(ipath)
+
+            if ipath_basename not in already_checked:
+                already_checked.append(ipath_basename)
+
+                path_exe_pathname = shutil.which(ipath_basename)
+
+                if path_exe_pathname:
+                    exe_pathname = path_exe_pathname
+                    break
 
         self._cached_exe_pathname = exe_pathname
 
