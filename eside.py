@@ -58,6 +58,7 @@ show_non_exe_emulator=1
 show_emulator_name=0
 show_emulator_roms_count=0
 sort_emulators=1
+default_emulator=emulator.pcsx2
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -156,6 +157,7 @@ class Emulator:
         run_pattern: str,
         roms_paths: str,
         roms_extensions: str,
+        internal_name: str,
         **kwargs
     ):
         self.system_name = system_name.strip()
@@ -165,6 +167,7 @@ class Emulator:
         self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
         self.rom_name_remove = []
         self.roms_extensions = roms_extensions.strip().split(',')
+        self.internal_name = internal_name
         self._cached_roms = None
         self._cached_exe_pathname = None
 
@@ -490,10 +493,19 @@ class MainWindow(QDialog):
 
 
     def _show_emulators(self):
+        default_emulator = self._config_global_section['default_emulator'].strip()
+        default_emulator_index = -1
+
         self._emu_selector.clear()
 
         for iemulator in self._emulators:
             self._emu_selector.addItem(self._format_emulator_name(iemulator))
+
+            if default_emulator and default_emulator_index == -1 and iemulator.internal_name == default_emulator:
+                default_emulator_index = self._emulators.index(iemulator)
+
+        if default_emulator_index != -1:
+            self._emu_selector.setCurrentIndex(default_emulator_index)
 
         self._update_current_emulator_tooltip()
 
@@ -510,7 +522,7 @@ class MainWindow(QDialog):
                 continue
 
             isection_data = dict(self._config[isection_name].items())
-            iemulator = Emulator(**isection_data)
+            iemulator = Emulator(**isection_data, internal_name=isection_name)
 
             if not show_non_exe_emulator:
                 # check if emulator executable exists
