@@ -142,6 +142,36 @@ roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 roms_extensions = iso, xex, xcp, *
+
+[emulator.vba-m]
+system_name = Nintendo Game Boy
+emulator_name = VisualBoyAdvance-M
+exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
+run_pattern = "{exe_path}" /f "{rom_path}"
+roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = gb
+
+[emulator.vba-m2]
+system_name = Nintendo Game Boy Color
+emulator_name = VisualBoyAdvance-M
+exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
+run_pattern = "{exe_path}" /f "{rom_path}"
+roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = gb, gbc
+
+[emulator.vba-m3]
+system_name = Nintendo Game Boy Advance
+emulator_name = VisualBoyAdvance-M
+exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
+run_pattern = "{exe_path}" /f "{rom_path}"
+roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = gba
 """
 
 
