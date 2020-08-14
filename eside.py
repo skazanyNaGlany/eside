@@ -59,7 +59,7 @@ show_non_exe_emulator=1
 show_emulator_name=0
 show_emulator_roms_count=0
 sort_emulators=1
-default_emulator=emulator.pcsx2
+default_emulator=emulator.epsxe
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -132,6 +132,16 @@ roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamc
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 roms_extensions = cdi, chd, gdi
+
+[emulator.xenia]
+system_name = Microsoft XBox 360
+emulator_name = Xenia
+exe_paths = D:\games\xenia\xenia.exe, xenia\xenia.exe
+run_pattern = "{exe_path}" "{rom_path}" --fullscreen
+roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+roms_extensions = iso, xex, xcp, *
 """
 
 
@@ -290,12 +300,12 @@ class Emulator:
         if not roms_path:
             return None
 
-        files = list(pathlib.Path(roms_path).rglob('*.*'))
+        files = list(pathlib.Path(roms_path).rglob('*'))
 
         for iextension in self.roms_extensions:
             iextension = iextension.strip()
 
-            iextension_full = '.' + iextension
+            iextension_full = '.' + iextension if iextension != '*' else ''
             iextension_full_len = len(iextension_full)
 
             for ifile in files:
@@ -309,12 +319,12 @@ class Emulator:
 
                 lower_filename = ifile.name.lower()
 
-                if not lower_filename.endswith(iextension_full):
+                if iextension_full and (not lower_filename.endswith(iextension_full)):
                     continue
 
                 clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
 
-                if clean_name.endswith(iextension_full):
+                if iextension_full and clean_name.endswith(iextension_full):
                     clean_name = clean_name[:iextension_full_len * -1]
 
                 if iextension == 'cue':
