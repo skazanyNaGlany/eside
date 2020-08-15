@@ -60,6 +60,7 @@ show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
 default_emulator = emulator.epsxe
+fix_game_title = 1
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -319,13 +320,10 @@ class Emulator:
         return exe_pathname
 
 
-    def get_emulator_roms(self, cached: bool = True) -> Optional[dict]:
+    def _get_emulator_roms(self) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
         to_skip = []
-
-        if cached and self._cached_roms is not None:
-            return self._cached_roms
 
         if not roms_path:
             return None
@@ -376,10 +374,33 @@ class Emulator:
 
                 roms[ifile_pathname] = clean_name.strip()
 
+        return roms
+
+
+    def _fixup_game_titles(self, roms:dict) -> dict:
+        for pathname in roms.copy():
+            name = roms[pathname]
+            parts = name.split()
+
+            if len(parts) >= 2 and parts[1] == 'The' and parts[0][-1] == ',':
+                if len(parts[0]) > 1 and parts[-2] != ',':
+                    part0 = parts[0][:-1]
+                    part1 = parts[1]
+
+                    parts[0] = part1
+                    parts[1] = part0
+
+                    roms[pathname] = ' '.join(parts)
+
+        return roms
+
+
+    def _count_rom_titles(self, roms:dict) -> dict:
         # append (2) (3) (4) etc. to duplicated names
         roms_values = list(roms.values())
-        for ientry in roms.copy():
-            name = roms[ientry]
+
+        for pathname in roms.copy():
+            name = roms[pathname]
             ientry_count = roms_values.count(name)
 
             if ientry_count > 1:
@@ -392,7 +413,26 @@ class Emulator:
 
                         counter += 1
 
-        self._cached_roms = {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
+        return roms
+
+
+    def _sort_roms_by_name(self, roms:dict) -> dict:
+        return {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
+
+
+    def get_emulator_roms(self, cached:bool = True, fixup_titles:bool = False) -> Optional[dict]:
+        if cached and self._cached_roms is not None:
+            return self._cached_roms
+
+        roms = self._get_emulator_roms()
+
+        if fixup_titles:
+            roms = self._fixup_game_titles(roms)
+
+        roms = self._count_rom_titles(roms)
+        roms = self._sort_roms_by_name(roms)
+
+        self._cached_roms = roms
         return self._cached_roms
 
 
@@ -520,6 +560,7 @@ class MainWindow(QDialog):
     def _format_emulator_name(self, iemulator:Emulator) -> str:
         show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
         show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
+        fix_game_title = self._config_global_section['fix_game_title'] == '1'
 
         if show_emulator_name or show_emulator_roms_count:
             formatted_name = '{system_name:<50}'.format(system_name=iemulator.system_name)
@@ -528,7 +569,7 @@ class MainWindow(QDialog):
                 formatted_name += '{emulator_name:<10}'.format(emulator_name=iemulator.emulator_name)
 
             if show_emulator_roms_count:
-                formatted_name += '{roms_count}'.format(roms_count = len(iemulator.get_emulator_roms()))
+                formatted_name += '{roms_count}'.format(roms_count = len(iemulator.get_emulator_roms(fixup_titles=fix_game_title)))
         else:
             formatted_name = '{system_name}'.format(system_name=iemulator.system_name)
 
@@ -571,6 +612,7 @@ class MainWindow(QDialog):
         show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
         show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
         sort_emulators = self._config_global_section['sort_emulators'] == '1'
+        fix_game_title = self._config_global_section['fix_game_title'] == '1'
 
         emulators = []
 
@@ -588,7 +630,7 @@ class MainWindow(QDialog):
 
             if not show_non_roms_emulator:
                 # check if emulator have roms
-                if not iemulator.get_emulator_roms():
+                if not iemulator.get_emulator_roms(fixup_titles=fix_game_title):
                     continue
 
             emulators.append(iemulator)
@@ -637,6 +679,8 @@ class MainWindow(QDialog):
 
 
     def _show_current_emulator_roms(self, first_run:bool = False, cached:bool = True):
+        fix_game_title = self._config_global_section['fix_game_title'] == '1'
+
         try:
             self._games_list.clear()
 
@@ -645,7 +689,7 @@ class MainWindow(QDialog):
             if not emulator:
                 return
 
-            self._roms = self._get_current_emulator().get_emulator_roms(cached)
+            self._roms = self._get_current_emulator().get_emulator_roms(cached, fixup_titles=fix_game_title)
 
             if not self._roms:
                 return
