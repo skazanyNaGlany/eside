@@ -599,7 +599,7 @@ class MainWindow(QDialog):
         return emulators
 
 
-    def _message_box(self, text: str, error:bool = True):
+    def _message_box(self, text: str, error:bool = False):
         msg = QMessageBox()
         msg.setTextFormat(Qt.RichText)
         msg.setWindowTitle(APP_NAME)
@@ -623,7 +623,7 @@ class MainWindow(QDialog):
 
             return config
         except Exception as x:
-            self._message_box(str(x))
+            self._log_exception(x)
             exit(1)
 
 
@@ -660,7 +660,7 @@ class MainWindow(QDialog):
                 self._games_list.setCurrentRow(0)
                 self._games_list.setFocus()
         except Exception as x:
-            self._message_box(str(x))
+            self._log_exception(x)
 
 
     def _get_rom_by_index(self, index: int) -> Optional[str]:
@@ -682,7 +682,7 @@ class MainWindow(QDialog):
         traceback.print_tb(x.__traceback__)
         print(str(type(x).__name__) + ': ' + str(x))
 
-        self._message_box(str(x))
+        self._message_box(str(x), True)
 
 
     def _run_selected_game(self):
@@ -735,7 +735,7 @@ class MainWindow(QDialog):
             <a href='{APP_URL}' style="text-decoration: none;">{APP_URL}</a>
         '''.format(APP_NAME=APP_NAME, APP_URL=APP_URL)
 
-        self._message_box(msg, False)
+        self._message_box(msg)
 
 
     def _config_button_clicked(self):
@@ -748,7 +748,7 @@ class MainWindow(QDialog):
                     DEFAULT_CONFIG.strip().splitlines(False)
                 )
 
-                self._message_box('Configuration file written to ' + target_config_pathname, False)
+                self._message_box('Configuration file written to ' + target_config_pathname)
             except:
                 self._message_box('Cannot write configuration file to ' + target_config_pathname, True)
                 return
