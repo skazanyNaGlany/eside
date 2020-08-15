@@ -97,7 +97,7 @@ roms_extensions = iso
 [emulator.dolphin]
 system_name = Nintendo GameCube
 emulator_name = Dolphin
-exe_paths = D:\games\Dolphin-x64\Dolphin.exe, Dolphin-x64\Dolphin.exe, dolphin-emu
+exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
 rom_name_remove0 = \[[^\]]*\]
@@ -107,7 +107,7 @@ roms_extensions = iso
 [emulator.dolphin2]
 system_name = Nintendo Wii
 emulator_name = Dolphin
-exe_paths = D:\games\Dolphin-x64\Dolphin.exe, Dolphin-x64\Dolphin.exe, dolphin-emu
+exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
 rom_name_remove0 = \[[^\]]*\]
