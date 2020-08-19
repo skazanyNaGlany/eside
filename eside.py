@@ -10,7 +10,6 @@ import shlex
 import pathlib
 import shutil
 import operator
-import pathlib
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
