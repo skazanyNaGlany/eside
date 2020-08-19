@@ -69,7 +69,7 @@ run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = cue, ccd, img, iso, bin
+roms_extensions = .cue, .ccd, .img, .iso, .bin
 
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
@@ -80,7 +80,7 @@ roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
-roms_extensions = iso
+roms_extensions = .iso
 
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
@@ -91,7 +91,7 @@ roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
-roms_extensions = iso
+roms_extensions = .iso
 
 [emulator.dolphin]
 system_name = Nintendo GameCube
@@ -101,7 +101,7 @@ run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = iso
+roms_extensions = .iso
 
 [emulator.dolphin2]
 system_name = Nintendo Wii
@@ -111,7 +111,7 @@ run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = iso
+roms_extensions = .iso
 
 [emulator.cemu]
 system_name = Nintendo Wii U
@@ -121,7 +121,7 @@ run_pattern = "{exe_path}" -f -g "{rom_path}"
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = wud, wux, iso, wad, rpx
+roms_extensions = .wud, .wux, .iso, .wad, .rpx
 
 [emulator.redream]
 system_name = Sega Dreamcast
@@ -131,7 +131,7 @@ run_pattern = "{exe_path}" "{rom_path}"
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = cdi, chd, gdi
+roms_extensions = .cdi, .chd, .gdi
 
 [emulator.xenia]
 system_name = Microsoft XBox 360
@@ -141,7 +141,7 @@ run_pattern = "{exe_path}" "{rom_path}" --fullscreen
 roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = iso, xex, xcp, *
+roms_extensions = .iso, .xex, .xcp, *
 
 [emulator.vba-m]
 system_name = Nintendo Game Boy
@@ -151,7 +151,7 @@ run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = gb
+roms_extensions = .gb
 
 [emulator.vba-m2]
 system_name = Nintendo Game Boy Color
@@ -161,7 +161,7 @@ run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = gb, gbc
+roms_extensions = .gb, .gbc
 
 [emulator.vba-m3]
 system_name = Nintendo Game Boy Advance
@@ -171,7 +171,7 @@ run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = gba
+roms_extensions = .gba
 """
 
 
@@ -228,7 +228,7 @@ class Emulator:
         self.run_pattern = run_pattern.strip()
         self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
         self.rom_name_remove = []
-        self.roms_extensions = roms_extensions.strip().split(',')
+        self.roms_extensions = [iextension.strip() for iextension in roms_extensions.strip().split(',')]
         self.internal_name = internal_name
         self._cached_roms = None
         self._cached_exe_pathname = None
@@ -330,10 +330,8 @@ class Emulator:
         files = list(pathlib.Path(roms_path).rglob('*'))
 
         for iextension in self.roms_extensions:
-            iextension = iextension.strip()
-
-            iextension_full = '.' + iextension if iextension != '*' else ''
-            iextension_full_len = len(iextension_full)
+            iextension = iextension if iextension != '*' else ''
+            iextension_len = len(iextension)
 
             for ifile in files:
                 ifile_pathname = str(ifile)
@@ -346,17 +344,17 @@ class Emulator:
 
                 lower_filename = ifile.name.lower()
 
-                if iextension_full and (not lower_filename.endswith(iextension_full)):
+                if iextension and (not lower_filename.endswith(iextension)):
                     continue
 
                 clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
 
-                if iextension_full and clean_name.endswith(iextension_full):
-                    clean_name = clean_name[:iextension_full_len * -1]
+                if iextension and clean_name.endswith(iextension):
+                    clean_name = clean_name[:iextension_len * -1]
 
-                if iextension == 'cue':
+                if iextension == '.cue':
                     to_skip = list(set(to_skip) | set(self._get_cue_bins(ifile_pathname)))
-                elif iextension == 'ccd':
+                elif iextension == '.ccd':
                     img_filename = clean_name + '.img'
 
                     if img_filename not in to_skip:
