@@ -10,6 +10,7 @@ import shlex
 import pathlib
 import shutil
 import operator
+import glob
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -291,21 +292,25 @@ class Emulator:
             ipath = ipath.strip()
 
             # just search in path provided in config
-            if os.path.exists(ipath):
+            exists = glob.glob(ipath)
+
+            if len(exists):
                 exe_pathname = ipath
                 break
 
             # search in dome directory
             home_ipath = os.path.join(home_dir, ipath)
+            exists = glob.glob(home_ipath)
 
-            if os.path.exists(home_ipath):
+            if len(exists):
                 exe_pathname = home_ipath
                 break
 
             # search in home + /systems/ directory
             home_systems_ipath = os.path.join(home_dir, 'systems', ipath)
+            exists = glob.glob(home_systems_ipath)
 
-            if os.path.exists(home_systems_ipath):
+            if len(exists):
                 exe_pathname = home_systems_ipath
                 break
 
