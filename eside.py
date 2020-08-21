@@ -474,6 +474,8 @@ class Emulator:
             self._raise_no_rom_run_pattern_exception(rom_path)
 
         run_command = run_pattern.format(exe_path = exe_path, rom_path = rom_path)
+        print('Running command: ' + run_command)
+
         args = shlex.split(run_command)
 
         self._running_rom = subprocess.Popen(args)
