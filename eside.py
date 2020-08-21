@@ -11,6 +11,7 @@ import pathlib
 import shutil
 import operator
 import glob
+import fnmatch
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -68,7 +69,7 @@ emulator_name = ePSXe
 exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe, epsxe_64/epsxe_x64, epsxe/epsxe_x64, epsxe/ePSXe
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
-run_pattern0_roms_extensions = .cue, .ccd, .img, .iso, .bin
+run_pattern0_roms_extensions = *.cue, *.ccd, *.img, *.iso, *.bin
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -78,7 +79,7 @@ emulator_name = PCSX2
 exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe, PCSX2/PCSX2
 roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
-run_pattern0_roms_extensions = .iso
+run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
@@ -89,7 +90,7 @@ emulator_name = PPSSPP
 exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
 roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
-run_pattern0_roms_extensions = .iso
+run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
@@ -100,7 +101,7 @@ emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
-run_pattern0_roms_extensions = .iso
+run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -110,7 +111,7 @@ emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
-run_pattern0_roms_extensions = .iso
+run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -120,7 +121,7 @@ emulator_name = Cemu
 exe_paths = D:\games\cemu\Cemu.exe, cemu\Cemu.exe
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
 run_pattern0 = "{exe_path}" -f -g "{rom_path}"
-run_pattern0_roms_extensions = .wud, .wux, .iso, .wad, .rpx
+run_pattern0_roms_extensions = *.wud, *.wux, *.iso, *.wad, *.rpx
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -130,7 +131,7 @@ emulator_name = Redream
 exe_paths = D:\games\redream\redream.exe, redream\redream.exe, redream\redream
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
 run_pattern0 = "{exe_path}" "{rom_path}"
-run_pattern0_roms_extensions = .cdi, .chd, .gdi
+run_pattern0_roms_extensions = *.cdi, *.chd, *.gdi
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -140,7 +141,7 @@ emulator_name = Xenia
 exe_paths = D:\games\xenia\xenia.exe, xenia\xenia.exe
 roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
-run_pattern0_roms_extensions = .iso, .xex, .xcp, *
+run_pattern0_roms_extensions = *.iso, *.xex, *.xcp, *
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -150,7 +151,7 @@ emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
 run_pattern0 = "{exe_path}" /f "{rom_path}"
-run_pattern0_roms_extensions = .gb
+run_pattern0_roms_extensions = *.gb
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -160,7 +161,7 @@ emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
 run_pattern0 = "{exe_path}" /f "{rom_path}"
-run_pattern0_roms_extensions = .gb, .gbc
+run_pattern0_roms_extensions = *.gb, *.gbc
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 
@@ -170,7 +171,7 @@ emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
 run_pattern0 = "{exe_path}" /f "{rom_path}"
-run_pattern0_roms_extensions = .gba
+run_pattern0_roms_extensions = *.gba
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
@@ -342,9 +343,6 @@ class Emulator:
         files = list(pathlib.Path(roms_path).rglob('*'))
 
         for iextension in roms_extensions:
-            iextension = iextension if iextension != '*' else ''
-            iextension_len = len(iextension)
-
             for ifile in files:
                 ifile_pathname = str(ifile)
 
@@ -356,17 +354,15 @@ class Emulator:
 
                 lower_filename = ifile.name.lower()
 
-                if iextension and (not lower_filename.endswith(iextension)):
+                if not fnmatch.fnmatch(lower_filename, iextension):
                     continue
 
                 clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
+                (clean_name, ext) = os.path.splitext(clean_name)
 
-                if iextension and clean_name.endswith(iextension):
-                    clean_name = clean_name[:iextension_len * -1]
-
-                if iextension == '.cue':
+                if iextension == '*.cue':
                     to_skip = list(set(to_skip) | set(self._get_cue_bins(ifile_pathname)))
-                elif iextension == '.ccd':
+                elif iextension == '*.ccd':
                     img_filename = clean_name + '.img'
 
                     if img_filename not in to_skip:
@@ -456,9 +452,7 @@ class Emulator:
 
         for irun_pattern_roms_extensions in self.run_patterns_roms_extensions:
             for iextension in irun_pattern_roms_extensions:
-                iextension = iextension if iextension != '*' else ''
-
-                if rom_path.endswith(iextension):
+                if fnmatch.fnmatch(rom_path, iextension):
                     run_pattern_index = self.run_patterns_roms_extensions.index(irun_pattern_roms_extensions)
 
                     return self.run_patterns[run_pattern_index]
