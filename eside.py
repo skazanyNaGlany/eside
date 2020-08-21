@@ -15,7 +15,7 @@ import warnings
 warnings.simplefilter('ignore', UserWarning)
 
 from typeguard import typechecked
-from typing import Optional
+from typing import Optional, List
 
 from PySide2.QtWidgets import ( # pylint: disable=no-name-in-module
     QApplication,
@@ -65,113 +65,113 @@ fix_game_title = 1
 system_name = Sony PlayStation
 emulator_name = ePSXe
 exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe, epsxe_64/epsxe_x64, epsxe/epsxe_x64, epsxe/ePSXe
-run_pattern = "{exe_path}" -loadbin "{rom_path}" -nogui
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
+run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
+run_pattern0_roms_extensions = .cue, .ccd, .img, .iso, .bin
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .cue, .ccd, .img, .iso, .bin
 
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
 exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe, PCSX2/PCSX2
-run_pattern = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
 roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
+run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
+run_pattern0_roms_extensions = .iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
-roms_extensions = .iso
 
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
 exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
-run_pattern = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
 roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
+run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
+run_pattern0_roms_extensions = .iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
 rom_name_remove1 = \[[^\]]*\]
 rom_name_remove2 = \(.*\)
-roms_extensions = .iso
 
 [emulator.dolphin]
 system_name = Nintendo GameCube
 emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
-run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
+run_pattern0 = "{exe_path}" -b -e "{rom_path}"
+run_pattern0_roms_extensions = .iso
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .iso
 
 [emulator.dolphin2]
 system_name = Nintendo Wii
 emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
-run_pattern = "{exe_path}" -b -e "{rom_path}"
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
+run_pattern0 = "{exe_path}" -b -e "{rom_path}"
+run_pattern0_roms_extensions = .iso
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .iso
 
 [emulator.cemu]
 system_name = Nintendo Wii U
 emulator_name = Cemu
 exe_paths = D:\games\cemu\Cemu.exe, cemu\Cemu.exe
-run_pattern = "{exe_path}" -f -g "{rom_path}"
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
+run_pattern0 = "{exe_path}" -f -g "{rom_path}"
+run_pattern0_roms_extensions = .wud, .wux, .iso, .wad, .rpx
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .wud, .wux, .iso, .wad, .rpx
 
 [emulator.redream]
 system_name = Sega Dreamcast
 emulator_name = Redream
 exe_paths = D:\games\redream\redream.exe, redream\redream.exe, redream\redream
-run_pattern = "{exe_path}" "{rom_path}"
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
+run_pattern0 = "{exe_path}" "{rom_path}"
+run_pattern0_roms_extensions = .cdi, .chd, .gdi
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .cdi, .chd, .gdi
 
 [emulator.xenia]
 system_name = Microsoft XBox 360
 emulator_name = Xenia
 exe_paths = D:\games\xenia\xenia.exe, xenia\xenia.exe
-run_pattern = "{exe_path}" "{rom_path}" --fullscreen
 roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
+run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
+run_pattern0_roms_extensions = .iso, .xex, .xcp, *
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .iso, .xex, .xcp, *
 
 [emulator.vba-m]
 system_name = Nintendo Game Boy
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
-run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
+run_pattern0 = "{exe_path}" /f "{rom_path}"
+run_pattern0_roms_extensions = .gb
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .gb
 
 [emulator.vba-m2]
 system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
-run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
+run_pattern0 = "{exe_path}" /f "{rom_path}"
+run_pattern0_roms_extensions = .gb, .gbc
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .gb, .gbc
 
 [emulator.vba-m3]
 system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
-run_pattern = "{exe_path}" /f "{rom_path}"
 roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
+run_pattern0 = "{exe_path}" /f "{rom_path}"
+run_pattern0_roms_extensions = .gba
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
-roms_extensions = .gba
 """
 
 
@@ -208,6 +208,11 @@ class Utils:
         return lines
 
 
+    @staticmethod
+    def string_split_strip(str_to_split:str, separator:str) -> List[str]:
+        return [s.strip() for s in str_to_split.strip().split(separator) if s.strip() != '']
+
+
 @typechecked_class_decorator()
 class Emulator:
     CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
@@ -215,27 +220,23 @@ class Emulator:
     def __init__(self,
         system_name: str,
         emulator_name: str,
-        exe_paths: str,
-        run_pattern: str,
-        roms_paths: str,
-        roms_extensions: str,
-        internal_name: str,
-        **kwargs
+        exe_paths: List[str],
+        run_patterns: List[str],
+        roms_paths: List[str],
+        run_patterns_roms_extensions: List[List[str]],
+        rom_name_remove: List[str],
+        internal_name: str
     ):
-        self.system_name = system_name.strip()
-        self.emulator_name = emulator_name.strip()
-        self.exe_paths = exe_paths.strip().replace('\\', os.sep).split(',')
-        self.run_pattern = run_pattern.strip()
-        self.roms_paths = roms_paths.strip().replace('\\', os.sep).split(',')
-        self.rom_name_remove = []
-        self.roms_extensions = [iextension.strip() for iextension in roms_extensions.strip().split(',')]
+        self.system_name = system_name
+        self.emulator_name = emulator_name
+        self.exe_paths = exe_paths
+        self.run_patterns = run_patterns
+        self.roms_paths = roms_paths
+        self.rom_name_remove = rom_name_remove
+        self.run_patterns_roms_extensions = run_patterns_roms_extensions
         self.internal_name = internal_name
         self._cached_roms = None
         self._cached_exe_pathname = None
-
-        for ikey in kwargs:
-            if ikey.startswith('rom_name_remove'):
-                self.rom_name_remove.append(kwargs[ikey].strip())
 
 
     def _get_roms_path(self) -> Optional[str]:
@@ -269,6 +270,12 @@ class Emulator:
         raise Exception('No emulator executable for {system_name} ({emulator_name}) found'.format(
             system_name=self.system_name,
             emulator_name=self.emulator_name
+        ))
+
+
+    def _raise_no_rom_run_pattern_exception(self, rom_path:str):
+        raise Exception('No run pattern found for rom {rom_path}'.format(
+            rom_path=rom_path
         ))
 
 
@@ -319,7 +326,7 @@ class Emulator:
         return exe_pathname
 
 
-    def _get_emulator_roms(self) -> Optional[dict]:
+    def _get_emulator_roms(self, roms_extensions:list) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
         to_skip = []
@@ -329,7 +336,7 @@ class Emulator:
 
         files = list(pathlib.Path(roms_path).rglob('*'))
 
-        for iextension in self.roms_extensions:
+        for iextension in roms_extensions:
             iextension = iextension if iextension != '*' else ''
             iextension_len = len(iextension)
 
@@ -421,7 +428,13 @@ class Emulator:
         if cached and self._cached_roms is not None:
             return self._cached_roms
 
-        roms = self._get_emulator_roms()
+        roms = {}
+
+        for iroms_extensions in self.run_patterns_roms_extensions:
+            new_roms = self._get_emulator_roms(iroms_extensions)
+
+            if new_roms:
+                roms.update(new_roms)
 
         if fixup_titles:
             roms = self._fixup_game_titles(roms)
@@ -433,13 +446,32 @@ class Emulator:
         return self._cached_roms
 
 
+    def _find_rom_run_pattern(self, rom_path:str) -> Optional[str]:
+        rom_path = rom_path.lower()
+
+        for irun_pattern_roms_extensions in self.run_patterns_roms_extensions:
+            for iextension in irun_pattern_roms_extensions:
+                if rom_path.endswith(iextension):
+                    run_pattern_index = self.run_patterns_roms_extensions.index(irun_pattern_roms_extensions)
+
+                    return self.run_patterns[run_pattern_index]
+
+        return None
+
+
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
         if not exe_path:
             self._raise_no_exe_exception()
 
-        run_command = self.run_pattern.format(exe_path = exe_path, rom_path = rom_path)
+        run_pattern = self._find_rom_run_pattern(rom_path)
+
+        if not run_pattern:
+            # should not get here
+            self._raise_no_rom_run_pattern_exception(rom_path)
+
+        run_command = run_pattern.format(exe_path = exe_path, rom_path = rom_path)
         args = shlex.split(run_command)
 
         self._running_rom = subprocess.Popen(args)
@@ -605,6 +637,40 @@ class MainWindow(QDialog):
         self._update_current_emulator_tooltip()
 
 
+    def _parse_emulator_config(self, emulator_config_section_name:str, emulator_config_section_data:dict):
+        run_patterns = []
+        run_patterns_roms_extensions = []
+        rom_name_remove = []
+
+        for ikey in emulator_config_section_data:
+            if ikey.startswith('run_pattern') and not ikey.endswith('_roms_extensions'):
+                roms_extensions = emulator_config_section_data[ikey + '_roms_extensions'].strip()
+
+                run_patterns.append(emulator_config_section_data[ikey].strip())
+                run_patterns_roms_extensions.append(
+                    Utils.string_split_strip(roms_extensions.lower(), ',')
+                )
+            elif ikey.startswith('rom_name_remove'):
+                rom_name_remove.append(emulator_config_section_data[ikey].strip())
+
+        return {
+            'system_name': emulator_config_section_data['system_name'].strip(),
+            'emulator_name': emulator_config_section_data['emulator_name'].strip(),
+            'internal_name': emulator_config_section_name.strip(),
+            'exe_paths': Utils.string_split_strip(
+                emulator_config_section_data['exe_paths'].replace('\\', os.sep),
+                ','
+            ),
+            'roms_paths': Utils.string_split_strip(
+                emulator_config_section_data['roms_paths'].replace('\\', os.sep),
+                ','
+            ),
+            'run_patterns': run_patterns,
+            'run_patterns_roms_extensions': run_patterns_roms_extensions,
+            'rom_name_remove': rom_name_remove
+        }
+
+
     def _load_emulators(self) -> list:
         show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
         show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
@@ -618,7 +684,9 @@ class MainWindow(QDialog):
                 continue
 
             isection_data = dict(self._config[isection_name].items())
-            iemulator = Emulator(**isection_data, internal_name=isection_name)
+            emulator_config = self._parse_emulator_config(isection_name, isection_data)
+
+            iemulator = Emulator(**emulator_config)
 
             if not show_non_exe_emulator:
                 # check if emulator executable exists
