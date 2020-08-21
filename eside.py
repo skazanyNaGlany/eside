@@ -448,11 +448,11 @@ class Emulator:
 
 
     def _find_rom_run_pattern(self, rom_path:str) -> Optional[str]:
-        rom_path = rom_path.lower()
+        rom_path_basename = os.path.basename(rom_path.lower())
 
         for irun_pattern_roms_extensions in self.run_patterns_roms_extensions:
             for iextension in irun_pattern_roms_extensions:
-                if fnmatch.fnmatch(rom_path, iextension):
+                if fnmatch.fnmatch(rom_path_basename, iextension):
                     run_pattern_index = self.run_patterns_roms_extensions.index(irun_pattern_roms_extensions)
 
                     return self.run_patterns[run_pattern_index]
