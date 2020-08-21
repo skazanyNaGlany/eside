@@ -296,7 +296,7 @@ class Emulator:
             exists = glob.glob(ipath)
 
             if len(exists):
-                exe_pathname = ipath
+                exe_pathname = exists[0]
                 break
 
             # search in dome directory
@@ -304,7 +304,7 @@ class Emulator:
             exists = glob.glob(home_ipath)
 
             if len(exists):
-                exe_pathname = home_ipath
+                exe_pathname = exists[0]
                 break
 
             # search in home + /systems/ directory
@@ -312,7 +312,7 @@ class Emulator:
             exists = glob.glob(home_systems_ipath)
 
             if len(exists):
-                exe_pathname = home_systems_ipath
+                exe_pathname = exists[0]
                 break
 
             # search in system's PATH
