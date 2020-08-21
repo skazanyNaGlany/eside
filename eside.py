@@ -451,6 +451,8 @@ class Emulator:
 
         for irun_pattern_roms_extensions in self.run_patterns_roms_extensions:
             for iextension in irun_pattern_roms_extensions:
+                iextension = iextension if iextension != '*' else ''
+
                 if rom_path.endswith(iextension):
                     run_pattern_index = self.run_patterns_roms_extensions.index(irun_pattern_roms_extensions)
 
