@@ -68,6 +68,7 @@ system_name = Sony PlayStation
 emulator_name = ePSXe
 exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe, epsxe_64/epsxe_x64, epsxe/epsxe_x64, epsxe/ePSXe
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
 run_pattern0_roms_extensions = *.cue, *.ccd, *.img, *.iso, *.bin
 rom_name_remove0 = \[[^\]]*\]
@@ -78,6 +79,7 @@ system_name = Sony PlayStation 2
 emulator_name = PCSX2
 exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe, PCSX2/PCSX2
 roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
 run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
@@ -89,6 +91,7 @@ system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
 exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
 roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
 run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = ^[A-Z]{4}_[0-9]{3}.[0-9]{2}.
@@ -100,6 +103,7 @@ system_name = Nintendo GameCube
 emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
 run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = \[[^\]]*\]
@@ -110,6 +114,7 @@ system_name = Nintendo Wii
 emulator_name = Dolphin
 exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
 run_pattern0_roms_extensions = *.iso
 rom_name_remove0 = \[[^\]]*\]
@@ -120,6 +125,7 @@ system_name = Nintendo Wii U
 emulator_name = Cemu
 exe_paths = D:\games\cemu\Cemu.exe, cemu\Cemu.exe
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" -f -g "{rom_path}"
 run_pattern0_roms_extensions = *.wud, *.wux, *.iso, *.wad, *.rpx
 rom_name_remove0 = \[[^\]]*\]
@@ -130,6 +136,7 @@ system_name = Sega Dreamcast
 emulator_name = Redream
 exe_paths = D:\games\redream\redream.exe, redream\redream.exe, redream\redream
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.cdi, *.chd, *.gdi
 rom_name_remove0 = \[[^\]]*\]
@@ -140,6 +147,7 @@ system_name = Microsoft XBox 360
 emulator_name = Xenia
 exe_paths = D:\games\xenia\xenia.exe, xenia\xenia.exe
 roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
+rom_basename_ignore = *.log
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
 run_pattern0_roms_extensions = *.iso, *.xex, *.xcp, *
 rom_name_remove0 = \[[^\]]*\]
@@ -150,6 +158,7 @@ system_name = Nintendo Game Boy
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gb
 rom_name_remove0 = \[[^\]]*\]
@@ -160,6 +169,7 @@ system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gb, *.gbc
 rom_name_remove0 = \[[^\]]*\]
@@ -227,7 +237,8 @@ class Emulator:
         roms_paths: List[str],
         run_patterns_roms_extensions: List[List[str]],
         rom_name_remove: List[str],
-        internal_name: str
+        internal_name: str,
+        rom_basename_ignore: List[str]
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -237,6 +248,7 @@ class Emulator:
         self.rom_name_remove = rom_name_remove
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
         self.internal_name = internal_name
+        self.rom_basename_ignore = rom_basename_ignore
         self._cached_roms = None
         self._cached_exe_pathname = None
 
@@ -332,6 +344,14 @@ class Emulator:
         return exe_pathname
 
 
+    def _ignore_file(self, filename:str) -> bool:
+        for ipattern in self.rom_basename_ignore:
+            if fnmatch.fnmatch(filename, ipattern):
+                return True
+
+        return False
+
+
     def _get_emulator_roms(self, roms_extensions:list) -> Optional[dict]:
         roms_path = self._get_roms_path()
         roms = {}
@@ -350,6 +370,9 @@ class Emulator:
                     continue
 
                 if ifile.name.startswith('.') or not ifile.is_file():
+                    continue
+
+                if self._ignore_file(ifile.name):
                     continue
 
                 lower_filename = ifile.name.lower()
@@ -670,7 +693,11 @@ class MainWindow(QDialog):
             ),
             'run_patterns': run_patterns,
             'run_patterns_roms_extensions': run_patterns_roms_extensions,
-            'rom_name_remove': rom_name_remove
+            'rom_name_remove': rom_name_remove,
+            'rom_basename_ignore': Utils.string_split_strip(
+                emulator_config_section_data['rom_basename_ignore'],
+                ','
+            )
         }
 
 
