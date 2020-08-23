@@ -372,13 +372,25 @@ class Emulator:
         return False
 
 
+    def _parse_roms_config(self, roms_ini_path:str) -> ConfigParser:
+        config = ConfigParser()
+        config.read_string(open(roms_ini_path).read())
+
+        return config
+
+
     def _get_emulator_roms(self, roms_extensions:list) -> Optional[dict]:
         roms_path = self._get_roms_path()
+        roms_ini_path = os.path.join(roms_path, 'roms.ini')
+        roms_config = None
         roms = {}
         to_skip = []
 
         if not roms_path:
             return None
+
+        if os.path.exists(roms_ini_path):
+            roms_config = self._parse_roms_config(roms_ini_path)
 
         files = list(pathlib.Path(roms_path).rglob('*'))
 
@@ -419,6 +431,9 @@ class Emulator:
                         continue
 
                     clean_name = re.sub(ire, '', clean_name)
+
+                if roms_config and 'titles' in roms_config and ifile.name in roms_config['titles']:
+                    clean_name = roms_config['titles'][ifile.name]
 
                 roms[ifile_pathname] = clean_name.strip()
 
