@@ -185,6 +185,17 @@ run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gba
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.mame]
+system_name = Arcade
+emulator_name = MAME
+exe_paths = D:\games\mame\mame64.exe, mame\mame64.exe
+roms_paths = arcade, roms\arcade, D:\games\arcade, D:\games\roms\arcade
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
+run_pattern0_roms_extensions = *.zip
+rom_name_remove0 =
+rom_name_remove1 =
 """
 
 
