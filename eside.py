@@ -189,7 +189,7 @@ rom_name_remove1 = \(.*\)
 [emulator.mame]
 system_name = Arcade
 emulator_name = MAME
-exe_paths = D:\games\mame\mame64.exe, mame\mame64.exe
+exe_paths = D:\games\mame\mame64.exe, mame\mame64.exe, mame
 roms_paths = arcade, roms\arcade, D:\games\arcade, D:\games\roms\arcade
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
