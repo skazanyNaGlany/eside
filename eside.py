@@ -180,6 +180,7 @@ system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
+rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gba
 rom_name_remove0 = \[[^\]]*\]
@@ -223,6 +224,14 @@ class Utils:
     @staticmethod
     def string_split_strip(str_to_split:str, separator:str) -> List[str]:
         return [s.strip() for s in str_to_split.strip().split(separator) if s.strip() != '']
+
+
+    @staticmethod
+    def string_lreplace(pattern, sub, string):
+        if string.startswith(pattern):
+            return string.replace(pattern, '', 1)
+
+        return string
 
 
 @typechecked_class_decorator()
@@ -448,6 +457,14 @@ class Emulator:
         return {k: v for k, v in sorted(roms.items(), key=lambda item: item[1])}
 
 
+    def _add_new_roms(self, roms:dict, new_roms:dict):
+        roms_values = list(roms.values())
+
+        for ipathname, iname in new_roms.items():
+            if iname not in roms_values:
+                roms[ipathname] = iname
+
+
     def get_emulator_roms(self, cached:bool = True, fixup_titles:bool = False) -> Optional[dict]:
         if cached and self._cached_roms is not None:
             return self._cached_roms
@@ -458,7 +475,7 @@ class Emulator:
             new_roms = self._get_emulator_roms(iroms_extensions)
 
             if new_roms:
-                roms.update(new_roms)
+                self._add_new_roms(roms, new_roms)
 
         if fixup_titles:
             roms = self._fixup_game_titles(roms)
