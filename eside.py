@@ -12,6 +12,7 @@ import shutil
 import operator
 import glob
 import fnmatch
+import LnkParse3
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -60,7 +61,7 @@ show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.epsxe
+default_emulator = emulator.dosbox
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -185,6 +186,20 @@ run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gba
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.dosbox]
+system_name = PC
+emulator_name = DOSBox
+exe_paths = C:\Program Files (x86)\DOSBox-*\DOSBox.exe, dosbox
+roms_paths = pc, roms\pc, D:\games\pc, D:\games\roms\pc
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" {rom-command}
+#"C:\Program Files (x86)\GOG Galaxy\Games\Little Big Adventure\DOSBOX\DOSBox.exe" -conf "..\dosboxLBA.conf" -conf "..\dosboxLBA_single.conf" -noconsole -c "exit"
+run_pattern0_roms_extensions = Launch *.lnk
+run_pattern1 = "{exe_path}" "{rom_path}"
+run_pattern1_roms_extensions = *.exe
+rom_name_remove0 =
+rom_name_remove1 =
 """
 
 
@@ -500,6 +515,39 @@ class Emulator:
         return None
 
 
+    def _parse_lnk_file(self, filename:str, target_dict:dict):
+        lnk_object = LnkParse3.lnk_file(open(filename, 'rb'))
+        lnk_json = lnk_object.get_json()
+        dirname = os.path.dirname(filename)
+        working_directory = ''
+
+        if 'command_line_arguments' in lnk_json['data']:
+            command = lnk_json['data']['command_line_arguments']
+            dosbox_dir = os.path.join(dirname, 'DOSBOX')
+
+            if r'-conf "..\dosbox' in command and os.path.exists(dosbox_dir):
+                working_directory = dosbox_dir
+        else:
+            # command = os.path.join(
+            #     dirname,
+            #     lnk_object.get_command().replace('\\', os.path.sep)
+            # )
+
+            command = lnk_object.get_command().replace('\\', os.path.sep)
+
+            if command[0] == '.' and command[1] == os.path.sep:
+                command = command[2:]
+
+                command = os.path.join(dirname, command)
+
+            working_directory = dirname
+
+        if working_directory:
+            target_dict['rom-working-directory'] = working_directory
+
+        target_dict['rom-command'] = command
+
+
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
@@ -512,12 +560,24 @@ class Emulator:
             # should not get here
             self._raise_no_rom_run_pattern_exception(rom_path)
 
-        run_command = run_pattern.format(exe_path = exe_path, rom_path = rom_path)
+        run_pattern_data = {
+            'exe_path': exe_path,
+            'rom_path': rom_path
+        }
+
+        if rom_path.endswith('.lnk'):
+            # parse Windows .lnk file
+            self._parse_lnk_file(rom_path, run_pattern_data)
+
+        run_command = run_pattern.format(**run_pattern_data)
         print('Running command: ' + run_command)
 
         args = shlex.split(run_command)
 
-        self._running_rom = subprocess.Popen(args)
+        if 'rom-working-directory' in run_pattern_data:
+            self._running_rom = subprocess.Popen(args, cwd=run_pattern_data['rom-working-directory'])
+        else:
+            self._running_rom = subprocess.Popen(args)
 
         return self._running_rom
 
