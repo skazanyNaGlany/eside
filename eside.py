@@ -196,6 +196,17 @@ run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.zip
 rom_name_remove0 =
 rom_name_remove1 =
+
+[emulator.fceux]
+system_name = Nintendo Entertainment System
+emulator_name = FCEUX
+exe_paths = D:\games\fceux\fceux.exe, fceux\fceux.exe
+roms_paths = nes, roms\nes, D:\games\nes, D:\games\roms\nes
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" "{rom_path}"
+run_pattern0_roms_extensions = *.nes
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
 
 
