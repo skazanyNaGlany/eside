@@ -512,7 +512,13 @@ class Emulator:
             # should not get here
             self._raise_no_rom_run_pattern_exception(rom_path)
 
-        run_command = run_pattern.format(exe_path = exe_path, rom_path = rom_path)
+        run_pattern_data = {
+            'exe_path': exe_path,
+            'rom_path': rom_path,
+            'roms_path': self._get_roms_path()
+        }
+
+        run_command = run_pattern.format(**run_pattern_data)
         print('Running command: ' + run_command)
 
         args = shlex.split(run_command)
