@@ -241,6 +241,17 @@ run_pattern0_roms_extensions = *.nds
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 rom_name_remove2 = '^[0-9]{4}\ \-\ '
+
+[emulator.citra]
+system_name = Nintendo 3DS
+emulator_name = Citra
+exe_paths = D:\games\citra\nightly-mingw\citra-qt.exe, citra\nightly-mingw\citra-qt.exe
+roms_paths = 3ds, roms\3ds, D:\games\3ds, D:\games\roms\3ds
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" "{rom_path}"
+run_pattern0_roms_extensions = *.3ds
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
 
 
