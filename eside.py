@@ -229,6 +229,18 @@ run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.n64
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.desmume]
+system_name = Nintendo DS
+emulator_name = DeSmuME
+exe_paths = D:\games\desmume\DeSmuME*.exe
+roms_paths = nds, roms\nds, D:\games\nds, D:\games\roms\nds
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" "{rom_path}"
+run_pattern0_roms_extensions = *.nds
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+rom_name_remove2 = '^[0-9]{4}\ \-\ '
 """
 
 
@@ -759,7 +771,12 @@ class MainWindow(QDialog):
                     Utils.string_split_strip(roms_extensions.lower(), ',')
                 )
             elif ikey.startswith('rom_name_remove'):
-                rom_name_remove.append(emulator_config_section_data[ikey].strip())
+                regex_value = emulator_config_section_data[ikey]
+
+                if len(regex_value) >= 2 and regex_value[0] == "'" and regex_value[-1] == "'":
+                    regex_value = regex_value[1:-1]
+
+                rom_name_remove.append(regex_value)
 
         return {
             'system_name': emulator_config_section_data['system_name'].strip(),
