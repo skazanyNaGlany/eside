@@ -207,6 +207,17 @@ run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.nes
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.snes9x]
+system_name = Super Nintendo Entertainment System
+emulator_name = SNES9X
+exe_paths = D:\games\snes9x\snes9x*.exe, snes9x\snes9x*.exe
+roms_paths = snes, roms\snes, D:\games\snes, D:\games\roms\snes
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" -fullscreen "{rom_path}"
+run_pattern0_roms_extensions = *.sfc
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
 
 
