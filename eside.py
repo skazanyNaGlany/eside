@@ -252,6 +252,17 @@ run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.3ds
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.fusion]
+system_name = Sega Genesis
+emulator_name = Kega Fusion
+exe_paths = D:\games\fusion\Fusion.exe, fusion\Fusion.exe
+roms_paths = genesis, roms\genesis, D:\games\genesis, D:\games\roms\genesis
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" "{rom_path}" -fullscreen
+run_pattern0_roms_extensions = *.md
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
 
 
