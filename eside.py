@@ -215,7 +215,18 @@ exe_paths = D:\games\snes9x\snes9x*.exe, snes9x\snes9x*.exe
 roms_paths = snes, roms\snes, D:\games\snes, D:\games\roms\snes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -fullscreen "{rom_path}"
-run_pattern0_roms_extensions = *.sfc
+run_pattern0_roms_extensions = *.sfc, *.smc
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
+
+[emulator.project64]
+system_name = Nintendo 64
+emulator_name = Project64
+exe_paths = C:\Program Files (x86)\Project64 *\Project64.exe
+roms_paths = n64, roms\n64, D:\games\n64, D:\games\roms\n64
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" "{rom_path}"
+run_pattern0_roms_extensions = *.n64
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
