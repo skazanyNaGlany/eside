@@ -605,7 +605,7 @@ class Emulator:
 
         args = shlex.split(run_command)
 
-        self._running_rom = subprocess.Popen(args)
+        self._running_rom = subprocess.Popen(args, cwd=os.path.dirname(exe_path))
 
         return self._running_rom
 
@@ -619,7 +619,7 @@ class Emulator:
         run_command = '"{exe_path}"'.format(exe_path=exe_path)
         args = shlex.split(run_command)
 
-        self._running_rom = subprocess.Popen(args)
+        self._running_rom = subprocess.Popen(args, cwd=os.path.dirname(exe_path))
 
         return self._running_rom
 
