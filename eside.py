@@ -12,6 +12,7 @@ import shutil
 import operator
 import glob
 import fnmatch
+import LnkParse3
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -55,6 +56,7 @@ APP_URL = 'https://github.com/skazanyNaGlany/eside'
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
+systems_search_path = systems, systems.lnk, $ProgramFiles(x86), $Path, $PATH
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
@@ -66,7 +68,7 @@ fix_game_title = 1
 [emulator.epsxe]
 system_name = Sony PlayStation
 emulator_name = ePSXe
-exe_paths = D:\games\epsxe\ePSXe.exe, epsxe\ePSXe.exe, epsxe_64/epsxe_x64, epsxe/epsxe_x64, epsxe/ePSXe
+exe_paths = epsxe\ePSXe.exe, epsxe/epsxe_x64
 roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
@@ -77,7 +79,7 @@ rom_name_remove1 = \(.*\)
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
-exe_paths = C:\Program Files (x86)\PCSX2\pcsx2.exe, pcsx2\pcsx2.exe, PCSX2/PCSX2
+exe_paths = pcsx2\pcsx2.exe, pcsx2/PCSX2
 roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
@@ -89,7 +91,7 @@ rom_name_remove2 = \(.*\)
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
-exe_paths = C:\Program Files\PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
+exe_paths = PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
 roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
@@ -101,7 +103,7 @@ rom_name_remove2 = \(.*\)
 [emulator.dolphin]
 system_name = Nintendo GameCube
 emulator_name = Dolphin
-exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
+exe_paths = dolphin\Dolphin.exe, dolphin-emu
 roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
@@ -112,7 +114,7 @@ rom_name_remove1 = \(.*\)
 [emulator.dolphin2]
 system_name = Nintendo Wii
 emulator_name = Dolphin
-exe_paths = D:\games\dolphin\Dolphin.exe, dolphin\Dolphin.exe, dolphin-emu
+exe_paths = dolphin\Dolphin.exe, dolphin-emu
 roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
@@ -123,7 +125,7 @@ rom_name_remove1 = \(.*\)
 [emulator.cemu]
 system_name = Nintendo Wii U
 emulator_name = Cemu
-exe_paths = D:\games\cemu\Cemu.exe, cemu\Cemu.exe
+exe_paths = cemu\Cemu.exe
 roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -f -g "{rom_path}"
@@ -134,7 +136,7 @@ rom_name_remove1 = \(.*\)
 [emulator.redream]
 system_name = Sega Dreamcast
 emulator_name = Redream
-exe_paths = D:\games\redream\redream.exe, redream\redream.exe, redream\redream
+exe_paths = redream\redream.exe, redream\redream
 roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -145,7 +147,7 @@ rom_name_remove1 = \(.*\)
 [emulator.xenia]
 system_name = Microsoft XBox 360
 emulator_name = Xenia
-exe_paths = D:\games\xenia\xenia.exe, xenia\xenia.exe
+exe_paths = xenia\xenia.exe
 roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
 rom_basename_ignore = *.log
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
@@ -167,7 +169,7 @@ rom_name_remove1 = \(.*\)
 [emulator.vba-m2]
 system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
-exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
+exe_paths = vba-m\visualboyadvance-m.exe
 roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
@@ -178,7 +180,7 @@ rom_name_remove1 = \(.*\)
 [emulator.vba-m3]
 system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
-exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
+exe_paths = vba-m\visualboyadvance-m.exe
 roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
@@ -189,7 +191,7 @@ rom_name_remove1 = \(.*\)
 [emulator.mame]
 system_name = Arcade
 emulator_name = MAME
-exe_paths = D:\games\mame\mame64.exe, mame\mame64.exe, mame
+exe_paths = mame\mame64.exe, mame
 roms_paths = arcade, roms\arcade, D:\games\arcade, D:\games\roms\arcade
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
@@ -200,7 +202,7 @@ rom_name_remove1 =
 [emulator.fceux]
 system_name = Nintendo Entertainment System
 emulator_name = FCEUX
-exe_paths = D:\games\fceux\fceux.exe, fceux\fceux.exe
+exe_paths = fceux\fceux.exe
 roms_paths = nes, roms\nes, D:\games\nes, D:\games\roms\nes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -211,7 +213,7 @@ rom_name_remove1 = \(.*\)
 [emulator.snes9x]
 system_name = Super Nintendo Entertainment System
 emulator_name = SNES9X
-exe_paths = D:\games\snes9x\snes9x*.exe, snes9x\snes9x*.exe
+exe_paths = snes9x\snes9x*.exe
 roms_paths = snes, roms\snes, D:\games\snes, D:\games\roms\snes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -fullscreen "{rom_path}"
@@ -222,7 +224,7 @@ rom_name_remove1 = \(.*\)
 [emulator.project64]
 system_name = Nintendo 64
 emulator_name = Project64
-exe_paths = C:\Program Files (x86)\Project64 *\Project64.exe
+exe_paths = project64\Project64.exe
 roms_paths = n64, roms\n64, D:\games\n64, D:\games\roms\n64
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -233,7 +235,7 @@ rom_name_remove1 = \(.*\)
 [emulator.desmume]
 system_name = Nintendo DS
 emulator_name = DeSmuME
-exe_paths = D:\games\desmume\DeSmuME*.exe
+exe_paths = desmume\DeSmuME*.exe
 roms_paths = nds, roms\nds, D:\games\nds, D:\games\roms\nds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -245,7 +247,7 @@ rom_name_remove2 = '^[0-9]{4}\ \-\ '
 [emulator.citra]
 system_name = Nintendo 3DS
 emulator_name = Citra
-exe_paths = D:\games\citra\nightly-mingw\citra-qt.exe, citra\nightly-mingw\citra-qt.exe
+exe_paths = citra\nightly-mingw\citra-qt.exe
 roms_paths = 3ds, roms\3ds, D:\games\3ds, D:\games\roms\3ds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -314,7 +316,8 @@ class Emulator:
         run_patterns_roms_extensions: List[List[str]],
         rom_name_remove: List[str],
         internal_name: str,
-        rom_basename_ignore: List[str]
+        rom_basename_ignore: List[str],
+        systems_search_path: List[str]      # from globals
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -325,6 +328,7 @@ class Emulator:
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
         self.internal_name = internal_name
         self.rom_basename_ignore = rom_basename_ignore
+        self.systems_search_path = systems_search_path
         self._cached_roms = None
         self._cached_exe_pathname = None
 
@@ -373,47 +377,30 @@ class Emulator:
         if cached and self._cached_exe_pathname is not None:
             return self._cached_exe_pathname
 
-        home_dir = pathlib.Path.home()
         exe_pathname = None
-        already_checked = []
 
-        for ipath in self.exe_paths:
-            ipath = ipath.strip()
+        # by path search
+        for isystem_path in self.systems_search_path:
+            for ipath2 in self.exe_paths:
+                ipath2_full_pathname = os.path.join(isystem_path, ipath2)
 
-            # just search in path provided in config
-            exists = glob.glob(ipath)
+                exists = glob.glob(ipath2_full_pathname)
 
-            if len(exists):
-                exe_pathname = exists[0]
-                break
-
-            # search in dome directory
-            home_ipath = os.path.join(home_dir, ipath)
-            exists = glob.glob(home_ipath)
-
-            if len(exists):
-                exe_pathname = exists[0]
-                break
-
-            # search in home + /systems/ directory
-            home_systems_ipath = os.path.join(home_dir, 'systems', ipath)
-            exists = glob.glob(home_systems_ipath)
-
-            if len(exists):
-                exe_pathname = exists[0]
-                break
-
-            # search in system's PATH
-            ipath_basename = os.path.basename(ipath)
-
-            if ipath_basename not in already_checked:
-                already_checked.append(ipath_basename)
-
-                path_exe_pathname = shutil.which(ipath_basename)
-
-                if path_exe_pathname:
-                    exe_pathname = path_exe_pathname
+                if len(exists):
+                    exe_pathname = os.path.realpath(exists[0])
                     break
+
+                ipath2_basename = os.path.basename(ipath2)
+                ipath2_full_pathname = os.path.join(isystem_path, ipath2_basename)
+
+                exists = glob.glob(ipath2_full_pathname)
+
+                if len(exists):
+                    exe_pathname = os.path.realpath(exists[0])
+                    break
+
+            if exe_pathname:
+                break
 
         self._cached_exe_pathname = exe_pathname
 
@@ -658,6 +645,7 @@ class MainWindow(QDialog):
         self._config = self._parse_config()
         self._config_global_section = dict(self._config['global'].items())
 
+        self._systems_search_path = self._prepare_systems_search_path()
         self._emulators = self._load_emulators()
 
         self._show_emulators()
@@ -811,6 +799,38 @@ class MainWindow(QDialog):
         }
 
 
+    def _get_windows_link_target(self, link_pathname:str) -> str:
+        lnk_object = LnkParse3.lnk_file(open(link_pathname, 'rb'))
+        lnk_json = lnk_object.get_json()
+
+        return lnk_json['link_info']['local_base_path'].strip()
+
+
+    def _prepare_systems_search_path(self) -> List[str]:
+        systems_search_path = self._config_global_section['systems_search_path'].split(',')
+        processed_paths = []
+
+        for ipath in systems_search_path:
+            ipath = ipath.strip()
+            expanded_paths = os.path.expandvars(ipath).split(os.path.pathsep)
+
+            for iprocessed_path in expanded_paths:
+                if not iprocessed_path:
+                    continue
+
+                if iprocessed_path and iprocessed_path[0] == '$':
+                    # skip not recognized environment variable
+                    continue
+
+                if iprocessed_path not in processed_paths:
+                    if iprocessed_path.endswith('.lnk') and os.path.isfile(iprocessed_path):
+                        iprocessed_path = self._get_windows_link_target(iprocessed_path)
+
+                    processed_paths.append(iprocessed_path)
+
+        return processed_paths
+
+
     def _load_emulators(self) -> list:
         show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
         show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
@@ -825,6 +845,8 @@ class MainWindow(QDialog):
 
             isection_data = dict(self._config[isection_name].items())
             emulator_config = self._parse_emulator_config(isection_name, isection_data)
+
+            emulator_config['systems_search_path'] = self._systems_search_path
 
             iemulator = Emulator(**emulator_config)
 
