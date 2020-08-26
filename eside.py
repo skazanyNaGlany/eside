@@ -56,7 +56,7 @@ APP_URL = 'https://github.com/skazanyNaGlany/eside'
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
-systems_search_path = systems, systems.lnk, $ProgramFiles(x86), $Path, $PATH
+systems_search_path = systems, systems.lnk, $ProgramFiles, $Path, $PATH
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
@@ -645,7 +645,7 @@ class MainWindow(QDialog):
         self._config = self._parse_config()
         self._config_global_section = dict(self._config['global'].items())
 
-        self._systems_search_path = self._prepare_systems_search_path()
+        self._systems_search_path = self._prepare_search_paths(self._config_global_section['systems_search_path'])
         self._emulators = self._load_emulators()
 
         self._show_emulators()
@@ -806,12 +806,11 @@ class MainWindow(QDialog):
         return lnk_json['link_info']['local_base_path'].strip()
 
 
-    def _prepare_systems_search_path(self) -> List[str]:
-        systems_search_path = self._config_global_section['systems_search_path'].split(',')
+    def _prepare_search_paths(self, search_paths:str) -> List[str]:
+        search_paths_split = Utils.string_split_strip(search_paths, ',')
         processed_paths = []
 
-        for ipath in systems_search_path:
-            ipath = ipath.strip()
+        for ipath in search_paths_split:
             expanded_paths = os.path.expandvars(ipath).split(os.path.pathsep)
 
             for iprocessed_path in expanded_paths:
