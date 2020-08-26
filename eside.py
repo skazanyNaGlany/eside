@@ -57,6 +57,7 @@ DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
 systems_search_path = systems, systems.lnk, $ProgramFiles, $Path, $PATH
+roms_search_path = roms, roms.lnk
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
@@ -69,7 +70,7 @@ fix_game_title = 1
 system_name = Sony PlayStation
 emulator_name = ePSXe
 exe_paths = epsxe\ePSXe.exe, epsxe/epsxe_x64
-roms_paths = psx, roms\psx, D:\games\psx, D:\games\roms\psx
+roms_paths = psx
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
 run_pattern0_roms_extensions = *.cue, *.ccd, *.img, *.iso, *.bin
@@ -80,7 +81,7 @@ rom_name_remove1 = \(.*\)
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
 exe_paths = pcsx2\pcsx2.exe, pcsx2/PCSX2
-roms_paths = ps2, roms\ps2, D:\games\ps2, D:\games\roms\ps2
+roms_paths = ps2
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
 run_pattern0_roms_extensions = *.iso
@@ -92,7 +93,7 @@ rom_name_remove2 = \(.*\)
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
 exe_paths = PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
-roms_paths = psp, roms\psp, D:\games\psp, D:\games\roms\psp
+roms_paths = psp
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
 run_pattern0_roms_extensions = *.iso
@@ -104,7 +105,7 @@ rom_name_remove2 = \(.*\)
 system_name = Nintendo GameCube
 emulator_name = Dolphin
 exe_paths = dolphin\Dolphin.exe, dolphin-emu
-roms_paths = gc, roms\gc, D:\games\gc, D:\games\roms\gc
+roms_paths = gc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
 run_pattern0_roms_extensions = *.iso
@@ -115,7 +116,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo Wii
 emulator_name = Dolphin
 exe_paths = dolphin\Dolphin.exe, dolphin-emu
-roms_paths = wii, roms\wii, D:\games\wii, D:\games\roms\wii
+roms_paths = wii
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
 run_pattern0_roms_extensions = *.iso
@@ -126,7 +127,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo Wii U
 emulator_name = Cemu
 exe_paths = cemu\Cemu.exe
-roms_paths = wiiu, roms\wiiu, D:\games\wiiu, D:\games\roms\wiiu
+roms_paths = wiiu
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -f -g "{rom_path}"
 run_pattern0_roms_extensions = *.wud, *.wux, *.iso, *.wad, *.rpx
@@ -137,7 +138,7 @@ rom_name_remove1 = \(.*\)
 system_name = Sega Dreamcast
 emulator_name = Redream
 exe_paths = redream\redream.exe, redream\redream
-roms_paths = dreamcast, roms\dreamcast, D:\games\dreamcast, D:\games\roms\dreamcast
+roms_paths = dreamcast
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.cdi, *.chd, *.gdi
@@ -148,7 +149,7 @@ rom_name_remove1 = \(.*\)
 system_name = Microsoft XBox 360
 emulator_name = Xenia
 exe_paths = xenia\xenia.exe
-roms_paths = x360, roms\x360, D:\games\x360, D:\games\roms\x360
+roms_paths = x360
 rom_basename_ignore = *.log
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
 run_pattern0_roms_extensions = *.iso, *.xex, *.xcp, *
@@ -159,7 +160,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo Game Boy
 emulator_name = VisualBoyAdvance-M
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
-roms_paths = gb, roms\gb, D:\games\gb, D:\games\roms\gb
+roms_paths = gb
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gb
@@ -170,7 +171,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
 exe_paths = vba-m\visualboyadvance-m.exe
-roms_paths = gbc, roms\gbc, D:\games\gbc, D:\games\roms\gbc
+roms_paths = gbc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gb, *.gbc
@@ -181,7 +182,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
 exe_paths = vba-m\visualboyadvance-m.exe
-roms_paths = gba, roms\gba, D:\games\gba, D:\games\roms\gba
+roms_paths = gba
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
 run_pattern0_roms_extensions = *.gba
@@ -192,7 +193,7 @@ rom_name_remove1 = \(.*\)
 system_name = Arcade
 emulator_name = MAME
 exe_paths = mame\mame64.exe, mame
-roms_paths = arcade, roms\arcade, D:\games\arcade, D:\games\roms\arcade
+roms_paths = arcade
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.zip
@@ -203,7 +204,7 @@ rom_name_remove1 =
 system_name = Nintendo Entertainment System
 emulator_name = FCEUX
 exe_paths = fceux\fceux.exe
-roms_paths = nes, roms\nes, D:\games\nes, D:\games\roms\nes
+roms_paths = nes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.nes
@@ -214,7 +215,7 @@ rom_name_remove1 = \(.*\)
 system_name = Super Nintendo Entertainment System
 emulator_name = SNES9X
 exe_paths = snes9x\snes9x*.exe
-roms_paths = snes, roms\snes, D:\games\snes, D:\games\roms\snes
+roms_paths = snes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -fullscreen "{rom_path}"
 run_pattern0_roms_extensions = *.sfc, *.smc
@@ -225,7 +226,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo 64
 emulator_name = Project64
 exe_paths = project64\Project64.exe
-roms_paths = n64, roms\n64, D:\games\n64, D:\games\roms\n64
+roms_paths = n64
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.n64
@@ -236,7 +237,7 @@ rom_name_remove1 = \(.*\)
 system_name = Nintendo DS
 emulator_name = DeSmuME
 exe_paths = desmume\DeSmuME*.exe
-roms_paths = nds, roms\nds, D:\games\nds, D:\games\roms\nds
+roms_paths = nds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.nds
@@ -248,7 +249,7 @@ rom_name_remove2 = '^[0-9]{4}\ \-\ '
 system_name = Nintendo 3DS
 emulator_name = Citra
 exe_paths = citra\nightly-mingw\citra-qt.exe
-roms_paths = 3ds, roms\3ds, D:\games\3ds, D:\games\roms\3ds
+roms_paths = 3ds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.3ds
@@ -317,7 +318,9 @@ class Emulator:
         rom_name_remove: List[str],
         internal_name: str,
         rom_basename_ignore: List[str],
-        systems_search_path: List[str]      # from globals
+        # globals:
+        systems_search_path: List[str],
+        roms_search_path: List[str]
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -329,18 +332,35 @@ class Emulator:
         self.internal_name = internal_name
         self.rom_basename_ignore = rom_basename_ignore
         self.systems_search_path = systems_search_path
+        self.roms_search_path = roms_search_path
         self._cached_roms = None
         self._cached_exe_pathname = None
+        self._cached_roms_pathname = None
 
 
-    def _get_roms_path(self) -> Optional[str]:
-        for ipath in self.roms_paths:
-            ipath = ipath.strip()
+    def _get_roms_path(self, cached:bool = True) -> Optional[str]:
+        if cached and self._cached_roms_pathname is not None:
+            return self._cached_roms_pathname
 
-            if os.path.exists(ipath):
-                return ipath
+        roms_path = None
 
-        return None
+        # by path search
+        for iroms_path in self.roms_search_path:
+            for ipath2 in self.roms_paths:
+                ipath2_full_pathname = os.path.join(iroms_path, ipath2)
+
+                exists = glob.glob(ipath2_full_pathname)
+
+                if len(exists):
+                    roms_path = os.path.realpath(exists[0])
+                    break
+
+            if roms_path:
+                break
+
+        self._cached_roms_pathname = roms_path
+
+        return roms_path
 
 
     def _get_cue_bins(self, cue_pathname: str) -> list:
@@ -646,6 +666,7 @@ class MainWindow(QDialog):
         self._config_global_section = dict(self._config['global'].items())
 
         self._systems_search_path = self._prepare_search_paths(self._config_global_section['systems_search_path'])
+        self._roms_search_path = self._prepare_search_paths(self._config_global_section['roms_search_path'])
         self._emulators = self._load_emulators()
 
         self._show_emulators()
@@ -846,6 +867,7 @@ class MainWindow(QDialog):
             emulator_config = self._parse_emulator_config(isection_name, isection_data)
 
             emulator_config['systems_search_path'] = self._systems_search_path
+            emulator_config['roms_search_path'] = self._roms_search_path
 
             iemulator = Emulator(**emulator_config)
 
