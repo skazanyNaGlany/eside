@@ -12,7 +12,6 @@ import shutil
 import operator
 import glob
 import fnmatch
-import LnkParse3
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -56,14 +55,15 @@ APP_URL = 'https://github.com/skazanyNaGlany/eside'
 DEFAULT_CONFIG_PATHNAME = 'eside.ini'
 DEFAULT_CONFIG = r"""
 [global]
-systems_search_path = systems, systems.lnk, $ProgramFiles, $Path, $PATH
-roms_search_path = roms, roms.lnk
+systems_search_path = systems, $ProgramFiles, $Path, $PATH
+roms_search_path = roms
+bios_search_path = systems\bios
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.epsxe
+default_emulator = emulator.fs-uae
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -255,7 +255,44 @@ run_pattern0 = "{exe_path}" "{rom_path}"
 run_pattern0_roms_extensions = *.3ds
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.fs-uae]
+system_name = Commodore Amiga
+emulator_name = FS-UAE
+exe_paths = fs-uae\System\FS-UAE\Windows\x86-64\fs-uae.exe
+roms_paths = amiga
+rom_basename_ignore =
+run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\" --floppy_drive_speed=100
+# run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\"
+# run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778
+# fs-uae.exe --amiga-model=a1200 --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
+run_pattern0_roms_extensions = *.adf
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
+
+# fs-uae.exe --amiga-model=a1200 --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
+# fs-uae.exe --amiga-model=a1200 "--floppy-drive-0=d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
+
+# fs-uae.exe 
+# --amiga-model=a1200 
+# --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" 
+# --floppy-drive-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" 
+# --floppy-drive-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" 
+# --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" 
+# --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" 
+# --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" 
+# --floppy_drive_speed=0 
+# --fullscreen 
+# --force-aspect=1.777777777777778
+
+# "{exe_path}"
+# --amiga-model=a1200 
+# {{iterate_roms --floppy-drive-{rom_index}={rom_path}}}
+# {{iterate_all_roms --floppy-image-{rom_index}={rom_path}}}
+# --floppy_drive_speed=0 
+# --fullscreen 
+# --force-aspect=1.777777777777778
 
 
 def typechecked_class_decorator(exclude=None):
@@ -307,6 +344,7 @@ class Utils:
 @typechecked_class_decorator()
 class Emulator:
     CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
+    SIMILAR_ROM_RE_SIGN = r'\(Disk\ \d\ of\ \d\)'
 
     def __init__(self,
         system_name: str,
@@ -320,7 +358,8 @@ class Emulator:
         rom_basename_ignore: List[str],
         # globals:
         systems_search_path: List[str],
-        roms_search_path: List[str]
+        roms_search_path: List[str],
+        bios_search_path: List[str]
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -333,9 +372,11 @@ class Emulator:
         self.rom_basename_ignore = rom_basename_ignore
         self.systems_search_path = systems_search_path
         self.roms_search_path = roms_search_path
+        self.bios_search_path = bios_search_path
         self._cached_roms = None
         self._cached_exe_pathname = None
         self._cached_roms_pathname = None
+        self._cached_bios_pathname = None
 
 
     def _get_roms_path(self, cached:bool = True) -> Optional[str]:
@@ -361,6 +402,25 @@ class Emulator:
         self._cached_roms_pathname = roms_path
 
         return roms_path
+
+
+    def _get_bios_path(self, cached:bool = True) -> Optional[str]:
+        if cached and self._cached_bios_pathname is not None:
+            return self._cached_bios_pathname
+
+        bios_path = None
+
+        # by path search
+        for ibios_path in self.bios_search_path:
+            exists = glob.glob(ibios_path)
+
+            if len(exists):
+                bios_path = os.path.realpath(exists[0])
+                break
+
+        self._cached_bios_pathname = bios_path
+
+        return bios_path
 
 
     def _get_cue_bins(self, cue_pathname: str) -> list:
@@ -589,6 +649,102 @@ class Emulator:
         return None
 
 
+    def _find_similar_roms(self, rom_path:str) -> List[str]:
+        dirname = os.path.dirname(rom_path)
+        basename = os.path.basename(rom_path)
+
+        (filename, extension) = os.path.splitext(basename)
+
+        match = re.findall(Emulator.SIMILAR_ROM_RE_SIGN, basename)
+        len_match = len(match)
+
+        if len_match != 1:
+            return [rom_path]
+
+        (no_disc_filename, count) = re.subn(Emulator.SIMILAR_ROM_RE_SIGN, '', basename, 1)
+        (clean_filename, extension) = os.path.splitext(no_disc_filename)
+
+        files = glob.glob(os.path.join(dirname, '*' + extension))
+        similar = []
+
+        for ifile in files:
+            ifile_basename = os.path.basename(ifile)
+
+            if ifile_basename.startswith(clean_filename) and len(re.findall(Emulator.SIMILAR_ROM_RE_SIGN, ifile_basename)) == 1 and ifile_basename.endswith(extension):
+                if ifile not in similar:
+                    similar.append(ifile)
+
+        return sorted(similar)
+
+
+    def _process_extended_pattern(self, pattern:str, rom_path:str, run_pattern_data:dict) -> str:
+        if '{{iterate_roms:' not in pattern:
+            return pattern
+
+        pattern_parts = shlex.split(pattern)
+        similar_roms = self._find_similar_roms(rom_path)
+
+        for index, ipattern_part in enumerate(pattern_parts):
+            if not ipattern_part or not ipattern_part.endswith('}}'):
+                continue
+
+            command_parts = ipattern_part[2:-2].split(':', 3)
+
+            if len(command_parts) != 3:
+                continue
+
+            similar_roms_copy = similar_roms.copy()
+
+            if command_parts[0] == 'iterate_roms':
+                result_str = ''
+
+                command_data_unfilled = command_parts[1]
+                command_max = int(command_parts[2])
+
+                if command_max < 1:
+                    continue
+
+                # first rom is always at 0 index
+                # "{exe_path}" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}} {{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir={bios_path}
+                # command_max = 2
+
+                if len(similar_roms_copy) > command_max:
+                    similar_roms_copy = similar_roms_copy[0:command_max]
+
+                result_str += command_data_unfilled.format(rom_index=0, rom_path=rom_path) + ' '
+
+                # avoid error when similar_roms_copy is empty (command_max=1)
+                if rom_path in similar_roms_copy:
+                    similar_roms_copy.remove(rom_path)
+
+                for irom_path_index, irom_path in enumerate(similar_roms_copy):
+                    result_str += command_data_unfilled.format(rom_index=irom_path_index + 1, rom_path=irom_path) + ' '
+
+                pattern_parts[index] = result_str
+            elif command_parts[0] == 'iterate_all_roms':
+                result_str = ''
+
+                command_data_unfilled = command_parts[1]
+                command_max = int(command_parts[2])
+
+                if command_max < 1:
+                    continue
+
+                # first rom is always at 0 index
+                # "{exe_path}" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}} {{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir={bios_path}
+                # command_max = 2
+
+                if len(similar_roms_copy) > command_max:
+                    similar_roms_copy = similar_roms_copy[0:command_max]
+
+                for irom_path_index, irom_path in enumerate(similar_roms_copy):
+                    result_str += command_data_unfilled.format(rom_index=irom_path_index, rom_path=irom_path) + ' '
+
+                pattern_parts[index] = result_str
+
+        return shlex.join(pattern_parts).replace('\'', '')
+
+
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
@@ -604,8 +760,11 @@ class Emulator:
         run_pattern_data = {
             'exe_path': exe_path,
             'rom_path': rom_path,
-            'roms_path': self._get_roms_path()
+            'roms_path': self._get_roms_path(),
+            'bios_path': self._get_bios_path()
         }
+
+        run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
 
         run_command = run_pattern.format(**run_pattern_data)
         print('Running command: ' + run_command)
@@ -667,6 +826,7 @@ class MainWindow(QDialog):
 
         self._systems_search_path = self._prepare_search_paths(self._config_global_section['systems_search_path'])
         self._roms_search_path = self._prepare_search_paths(self._config_global_section['roms_search_path'])
+        self._bios_search_path = self._prepare_search_paths(self._config_global_section['bios_search_path'])
         self._emulators = self._load_emulators()
 
         self._show_emulators()
@@ -820,13 +980,6 @@ class MainWindow(QDialog):
         }
 
 
-    def _get_windows_link_target(self, link_pathname:str) -> str:
-        lnk_object = LnkParse3.lnk_file(open(link_pathname, 'rb'))
-        lnk_json = lnk_object.get_json()
-
-        return lnk_json['link_info']['local_base_path'].strip()
-
-
     def _prepare_search_paths(self, search_paths:str) -> List[str]:
         search_paths_split = Utils.string_split_strip(search_paths, ',')
         processed_paths = []
@@ -843,9 +996,6 @@ class MainWindow(QDialog):
                     continue
 
                 if iprocessed_path not in processed_paths:
-                    if iprocessed_path.endswith('.lnk') and os.path.isfile(iprocessed_path):
-                        iprocessed_path = self._get_windows_link_target(iprocessed_path)
-
                     processed_paths.append(iprocessed_path)
 
         return processed_paths
@@ -868,6 +1018,7 @@ class MainWindow(QDialog):
 
             emulator_config['systems_search_path'] = self._systems_search_path
             emulator_config['roms_search_path'] = self._roms_search_path
+            emulator_config['bios_search_path'] = self._bios_search_path
 
             iemulator = Emulator(**emulator_config)
 
