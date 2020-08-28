@@ -265,36 +265,10 @@ rom_basename_ignore =
 x_floppy_drive_speed=0
 x_amiga_model=a1200
 run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
-# run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\"
-# run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778
-# fs-uae.exe --amiga-model=a1200 --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
 run_pattern0_roms_extensions = *.adf
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
-
-# fs-uae.exe --amiga-model=a1200 --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
-# fs-uae.exe --amiga-model=a1200 "--floppy-drive-0=d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
-
-# fs-uae.exe 
-# --amiga-model=a1200 
-# --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" 
-# --floppy-drive-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" 
-# --floppy-drive-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" 
-# --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" 
-# --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" 
-# --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" 
-# --floppy_drive_speed=0 
-# --fullscreen 
-# --force-aspect=1.777777777777778
-
-# "{exe_path}"
-# --amiga-model=a1200 
-# {{iterate_roms --floppy-drive-{rom_index}={rom_path}}}
-# {{iterate_all_roms --floppy-image-{rom_index}={rom_path}}}
-# --floppy_drive_speed=0 
-# --fullscreen 
-# --force-aspect=1.777777777777778
 
 
 def typechecked_class_decorator(exclude=None):
@@ -710,9 +684,6 @@ class Emulator:
                     continue
 
                 # first rom is always at 0 index
-                # "{exe_path}" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}} {{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir={bios_path}
-                # command_max = 2
-
                 if len(similar_roms_copy) > command_max:
                     similar_roms_copy = similar_roms_copy[0:command_max]
 
@@ -736,9 +707,6 @@ class Emulator:
                     continue
 
                 # first rom is always at 0 index
-                # "{exe_path}" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}} {{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir={bios_path}
-                # command_max = 2
-
                 if len(similar_roms_copy) > command_max:
                     similar_roms_copy = similar_roms_copy[0:command_max]
 
