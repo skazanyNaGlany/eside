@@ -262,7 +262,9 @@ emulator_name = FS-UAE
 exe_paths = fs-uae\System\FS-UAE\Windows\x86-64\fs-uae.exe
 roms_paths = amiga
 rom_basename_ignore =
-run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\" --floppy_drive_speed=100
+x_floppy_drive_speed=0
+x_amiga_model=a1200
+run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
 # run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --floppy_drive_speed=0 --fullscreen --force-aspect=1.777777777777778 --kickstart_dir=\"{bios_path}\"
 # run_pattern0 = \"{exe_path}\" --amiga-model=a1200 {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":4}} --fullscreen --force-aspect=1.777777777777778
 # fs-uae.exe --amiga-model=a1200 --floppy-drive-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-0="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="d:\games\roms\amiga\Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf" --floppy_drive_speed=0 --fullscreen --force-aspect=1.77720212936401
@@ -359,7 +361,8 @@ class Emulator:
         # globals:
         systems_search_path: List[str],
         roms_search_path: List[str],
-        bios_search_path: List[str]
+        bios_search_path: List[str],
+        custom_data: dict
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -373,6 +376,7 @@ class Emulator:
         self.systems_search_path = systems_search_path
         self.roms_search_path = roms_search_path
         self.bios_search_path = bios_search_path
+        self.custom_data = custom_data
         self._cached_roms = None
         self._cached_exe_pathname = None
         self._cached_roms_pathname = None
@@ -764,6 +768,9 @@ class Emulator:
             'bios_path': self._get_bios_path()
         }
 
+        if self.custom_data:
+            run_pattern_data.update(self.custom_data)
+
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
 
         run_command = run_pattern.format(**run_pattern_data)
@@ -941,6 +948,7 @@ class MainWindow(QDialog):
         run_patterns = []
         run_patterns_roms_extensions = []
         rom_name_remove = []
+        custom_data = {}
 
         for ikey in emulator_config_section_data:
             if ikey.startswith('run_pattern') and not ikey.endswith('_roms_extensions'):
@@ -957,6 +965,8 @@ class MainWindow(QDialog):
                     regex_value = regex_value[1:-1]
 
                 rom_name_remove.append(regex_value)
+            elif ikey.startswith('x_'):
+                custom_data[ikey] = emulator_config_section_data[ikey]
 
         return {
             'system_name': emulator_config_section_data['system_name'].strip(),
@@ -976,7 +986,8 @@ class MainWindow(QDialog):
             'rom_basename_ignore': Utils.string_split_strip(
                 emulator_config_section_data['rom_basename_ignore'],
                 ','
-            )
+            ),
+            'custom_data': custom_data
         }
 
 
