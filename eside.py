@@ -356,6 +356,8 @@ class Emulator:
         self._cached_roms_pathname = None
         self._cached_bios_pathname = None
 
+        self._roms_config = self._parse_roms_config()
+
 
     def _get_roms_path(self, cached:bool = True) -> Optional[str]:
         if cached and self._cached_roms_pathname is not None:
@@ -473,27 +475,46 @@ class Emulator:
         return False
 
 
-    def _parse_roms_config(self, roms_ini_path:str) -> ConfigParser:
+    def _parse_roms_config(self) -> Optional[ConfigParser]:
+        roms_path = self._get_roms_path()
+
+        if not roms_path:
+            return None
+
+        roms_ini_path = os.path.join(roms_path, 'roms.ini')
+
+        if not os.path.exists(roms_ini_path):
+            return None
+
         config = ConfigParser()
         config.read_string(open(roms_ini_path).read())
 
         return config
 
 
+    def _find_rom_config(self, rom_path:str) -> Optional[dict]:
+        if not self._roms_config:
+            return None
+
+        if rom_path in self._roms_config.sections():
+            return dict(self._roms_config[rom_path])
+
+        for ikey in self._roms_config.sections():
+            if fnmatch.fnmatch(rom_path, ikey):
+                return dict(self._roms_config[ikey])
+
+        return None
+
+
     def _get_emulator_roms(self, roms_extensions:list) -> Optional[dict]:
         roms_path = self._get_roms_path()
-        roms_ini_path = os.path.join(roms_path, 'roms.ini')
-        roms_config = None
         roms = {}
         to_skip = []
 
         if not roms_path:
             return None
 
-        if os.path.exists(roms_ini_path):
-            roms_config = self._parse_roms_config(roms_ini_path)
-
-        files = list(pathlib.Path(roms_path).rglob('*'))
+        files = sorted(list(pathlib.Path(roms_path).rglob('*')))
 
         for iextension in roms_extensions:
             for ifile in files:
@@ -512,6 +533,8 @@ class Emulator:
 
                 if not fnmatch.fnmatch(lower_filename, iextension):
                     continue
+
+                rom_config = self._find_rom_config(ifile.name)
 
                 clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
                 (clean_name, ext) = os.path.splitext(clean_name)
@@ -533,9 +556,8 @@ class Emulator:
 
                     clean_name = re.sub(ire, '', clean_name)
 
-                if roms_config and ifile.name in roms_config:
-                    if 'title' in roms_config[ifile.name]:
-                        clean_name = roms_config[ifile.name]['title']
+                if rom_config and 'title' in rom_config:
+                    clean_name = rom_config['title']
 
                 roms[ifile_pathname] = clean_name.strip()
 
@@ -596,6 +618,8 @@ class Emulator:
     def get_emulator_roms(self, cached:bool = True, fixup_titles:bool = False) -> Optional[dict]:
         if cached and self._cached_roms is not None:
             return self._cached_roms
+
+        self._roms_config = self._parse_roms_config()
 
         roms = {}
 
@@ -739,6 +763,11 @@ class Emulator:
 
         if self.custom_data:
             run_pattern_data.update(self.custom_data)
+
+        rom_config = self._find_rom_config(os.path.basename(rom_path))
+
+        if rom_config:
+            run_pattern_data.update(rom_config)
 
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
 
