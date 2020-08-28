@@ -559,8 +559,9 @@ class Emulator:
 
                     clean_name = re.sub(ire, '', clean_name)
 
-                if roms_config and 'titles' in roms_config and ifile.name in roms_config['titles']:
-                    clean_name = roms_config['titles'][ifile.name]
+                if roms_config and ifile.name in roms_config:
+                    if 'title' in roms_config[ifile.name]:
+                        clean_name = roms_config[ifile.name]['title']
 
                 roms[ifile_pathname] = clean_name.strip()
 
