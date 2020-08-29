@@ -536,6 +536,10 @@ class Emulator:
 
                 rom_config = self._find_rom_config(ifile.name)
 
+                if rom_config and 'main_rom' in rom_config and rom_config['main_rom']:
+                    if rom_config['main_rom'] != ifile.name:
+                        continue
+
                 clean_name = ifile_pathname.replace(roms_path + os.path.sep, '', 1).split(os.path.sep)[0]
                 (clean_name, ext) = os.path.splitext(clean_name)
 
