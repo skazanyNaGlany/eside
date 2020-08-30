@@ -529,7 +529,7 @@ class Emulator:
                 if ifile_pathname in roms:
                     continue
 
-                if ifile.name.startswith('.') or not ifile.is_file():
+                if ifile.name.startswith('.'):
                     continue
 
                 if self._ignore_file(ifile.name):
