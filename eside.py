@@ -270,16 +270,22 @@ rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
 
+# set False in production, True when developing
+typechecked_class_decorator_enabled = True
 
 def typechecked_class_decorator(exclude=None):
     if not exclude:
         exclude = []
 
     def decorate(cls):
+        if not typechecked_class_decorator_enabled:
+            return cls
+
         for attr in cls.__dict__:
             if callable(getattr(cls, attr)) and attr not in exclude:
                 setattr(cls, attr, typechecked(getattr(cls, attr)))
         return cls
+
     return decorate
 
 
