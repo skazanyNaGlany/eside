@@ -69,6 +69,7 @@ fix_game_title = 1
 [emulator.epsxe]
 system_name = Sony PlayStation
 emulator_name = ePSXe
+emulator_url = https://www.epsxe.com/
 exe_paths = epsxe\ePSXe.exe, epsxe/epsxe_x64
 roms_paths = psx
 rom_basename_ignore =
@@ -80,6 +81,7 @@ rom_name_remove1 = \(.*\)
 [emulator.pcsx2]
 system_name = Sony PlayStation 2
 emulator_name = PCSX2
+emulator_url = https://pcsx2.net/
 exe_paths = pcsx2\pcsx2.exe, pcsx2/PCSX2
 roms_paths = ps2
 rom_basename_ignore =
@@ -92,6 +94,7 @@ rom_name_remove2 = \(.*\)
 [emulator.ppsspp]
 system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
+emulator_url = https://www.ppsspp.org/
 exe_paths = PPSSPP\PPSSPPWindows.exe, ppsspp/PPSSPPSDL
 roms_paths = psp
 rom_basename_ignore =
@@ -104,6 +107,7 @@ rom_name_remove2 = \(.*\)
 [emulator.dolphin]
 system_name = Nintendo GameCube
 emulator_name = Dolphin
+emulator_url = https://dolphin-emu.org/
 exe_paths = dolphin\Dolphin.exe, dolphin-emu
 roms_paths = gc
 rom_basename_ignore =
@@ -115,6 +119,7 @@ rom_name_remove1 = \(.*\)
 [emulator.dolphin2]
 system_name = Nintendo Wii
 emulator_name = Dolphin
+emulator_url = https://dolphin-emu.org/
 exe_paths = dolphin\Dolphin.exe, dolphin-emu
 roms_paths = wii
 rom_basename_ignore =
@@ -126,6 +131,7 @@ rom_name_remove1 = \(.*\)
 [emulator.cemu]
 system_name = Nintendo Wii U
 emulator_name = Cemu
+emulator_url = https://cemu.info/
 exe_paths = cemu\Cemu.exe
 roms_paths = wiiu
 rom_basename_ignore =
@@ -137,6 +143,7 @@ rom_name_remove1 = \(.*\)
 [emulator.redream]
 system_name = Sega Dreamcast
 emulator_name = Redream
+emulator_url = https://redream.io/
 exe_paths = redream\redream.exe, redream\redream
 roms_paths = dreamcast
 rom_basename_ignore =
@@ -148,6 +155,7 @@ rom_name_remove1 = \(.*\)
 [emulator.xenia]
 system_name = Microsoft XBox 360
 emulator_name = Xenia
+emulator_url = https://xenia.jp/
 exe_paths = xenia\xenia.exe
 roms_paths = x360
 rom_basename_ignore = *.log
@@ -159,6 +167,7 @@ rom_name_remove1 = \(.*\)
 [emulator.vba-m]
 system_name = Nintendo Game Boy
 emulator_name = VisualBoyAdvance-M
+emulator_url = https://vba-m.com/
 exe_paths = D:\games\vba-m\visualboyadvance-m.exe, vba-m\visualboyadvance-m.exe
 roms_paths = gb
 rom_basename_ignore =
@@ -170,6 +179,7 @@ rom_name_remove1 = \(.*\)
 [emulator.vba-m2]
 system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
+emulator_url = https://vba-m.com/
 exe_paths = vba-m\visualboyadvance-m.exe
 roms_paths = gbc
 rom_basename_ignore =
@@ -181,6 +191,7 @@ rom_name_remove1 = \(.*\)
 [emulator.vba-m3]
 system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
+emulator_url = https://vba-m.com/
 exe_paths = vba-m\visualboyadvance-m.exe
 roms_paths = gba
 rom_basename_ignore =
@@ -192,6 +203,7 @@ rom_name_remove1 = \(.*\)
 [emulator.mame]
 system_name = Arcade
 emulator_name = MAME
+emulator_url = https://www.mamedev.org/
 exe_paths = mame\mame64.exe, mame
 roms_paths = arcade
 rom_basename_ignore =
@@ -203,6 +215,7 @@ rom_name_remove1 =
 [emulator.fceux]
 system_name = Nintendo Entertainment System
 emulator_name = FCEUX
+emulator_url = http://fceux.com/web/home.html
 exe_paths = fceux\fceux.exe
 roms_paths = nes
 rom_basename_ignore =
@@ -214,6 +227,7 @@ rom_name_remove1 = \(.*\)
 [emulator.snes9x]
 system_name = Super Nintendo Entertainment System
 emulator_name = SNES9X
+emulator_url = http://www.snes9x.com/
 exe_paths = snes9x\snes9x*.exe
 roms_paths = snes
 rom_basename_ignore =
@@ -225,6 +239,7 @@ rom_name_remove1 = \(.*\)
 [emulator.project64]
 system_name = Nintendo 64
 emulator_name = Project64
+emulator_url = https://www.pj64-emu.com/
 exe_paths = project64\Project64.exe
 roms_paths = n64
 rom_basename_ignore =
@@ -236,6 +251,7 @@ rom_name_remove1 = \(.*\)
 [emulator.desmume]
 system_name = Nintendo DS
 emulator_name = DeSmuME
+emulator_url = http://desmume.org/
 exe_paths = desmume\DeSmuME*.exe
 roms_paths = nds
 rom_basename_ignore =
@@ -248,6 +264,7 @@ rom_name_remove2 = '^[0-9]{4}\ \-\ '
 [emulator.citra]
 system_name = Nintendo 3DS
 emulator_name = Citra
+emulator_url = https://citra-emu.org/
 exe_paths = citra\nightly-mingw\citra-qt.exe
 roms_paths = 3ds
 rom_basename_ignore =
@@ -259,6 +276,7 @@ rom_name_remove1 = \(.*\)
 [emulator.fs-uae]
 system_name = Commodore Amiga
 emulator_name = FS-UAE
+emulator_url = https://fs-uae.net/
 exe_paths = fs-uae\System\FS-UAE\Windows\x86-64\fs-uae.exe
 roms_paths = amiga
 rom_basename_ignore =
