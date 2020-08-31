@@ -849,6 +849,7 @@ class MainWindow(QDialog):
         self._exit_button = QPushButton('Exit')
 
         self._message_label.setStyleSheet("background-color:white; border: 1px ridge gray")
+        self._message_label.setOpenExternalLinks(True)
 
         self._layout.addWidget(self._emu_selector)
         self._layout.addWidget(self._games_list)
