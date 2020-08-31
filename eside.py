@@ -921,6 +921,19 @@ class MainWindow(QDialog):
             self._emu_selector.setFont(QtGui.QFont('Terminal', 10))
 
 
+    def _show_message(self, message:str):
+        show = message != ''
+
+        if show:
+            self._games_list.hide()
+            self._message_label.show()
+        else:
+            self._games_list.show()
+            self._message_label.hide()
+
+        self._message_label.setText(message)
+
+
     def _format_emulator_name(self, iemulator:Emulator) -> str:
         show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
         show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
