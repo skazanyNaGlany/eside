@@ -32,8 +32,8 @@ from PySide2.QtWidgets import ( # pylint: disable=no-name-in-module
     QListWidgetItem
 )
 from PySide2 import QtCore, QtGui
-from PySide2.QtCore import Qt           # pylint: disable=no-name-in-module
-from PySide2.QtGui import QKeyEvent     # pylint: disable=no-name-in-module
+from PySide2.QtCore import Qt                   # pylint: disable=no-name-in-module
+from PySide2.QtGui import QKeyEvent, QFont      # pylint: disable=no-name-in-module
 
 from configparser import ConfigParser
 
@@ -63,7 +63,7 @@ show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.fs-uae
+default_emulator = emulator.mame
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -339,6 +339,18 @@ class Utils:
             return string.replace(pattern, '', 1)
 
         return string
+
+
+    @staticmethod
+    def lists_to_string(lists:list, separator:str) -> str:
+        all_items = []
+
+        for ilist in lists:
+            all_items.extend(ilist)
+
+        all_items = list(set(all_items))
+
+        return separator.join(all_items)
 
 
 @typechecked_class_decorator()
@@ -848,8 +860,11 @@ class MainWindow(QDialog):
         self._about_button = QPushButton('About')
         self._exit_button = QPushButton('Exit')
 
-        self._message_label.setStyleSheet("background-color:white; border: 1px ridge gray")
+        self._message_label.setStyleSheet('background-color: white; border: 1px ridge gray; padding: 15px;')
         self._message_label.setOpenExternalLinks(True)
+        self._message_label.setWordWrap(True)
+        self._message_label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self._message_label.setFont(QFont('Arial', 11))
 
         self._layout.addWidget(self._emu_selector)
         self._layout.addWidget(self._games_list)
@@ -916,6 +931,60 @@ class MainWindow(QDialog):
 
         self._emu_selector.setCurrentIndex(current_index)
         self._update_current_emulator_tooltip()
+        self._show_warning_message()
+
+
+    def _show_warning_message(self):
+        current_index = self._emu_selector.currentIndex()
+
+        if current_index <= -1:
+            return None
+
+        emulator = self._emulators[current_index]
+
+        exe_pathname = emulator.get_emulator_executable()
+        roms = emulator.get_emulator_roms()
+
+        if exe_pathname and roms:
+            self._show_message('')
+            return
+
+        if not exe_pathname:
+            systems_first_pathname = emulator.systems_search_path[0] if emulator.systems_search_path else ''
+            emulator_first_pathname = emulator.exe_paths[0].split(os.path.sep)[0] if emulator.exe_paths else ''
+
+            emulator_pathname = os.path.realpath(os.path.join(systems_first_pathname, emulator_first_pathname) if (systems_first_pathname and emulator_first_pathname) else os.path.sep)
+
+            message = r'''
+            Please install emulator for {system_name} ({emulator_name}) from <a href="{emulator_url}" style="text-decoration:none;">{emulator_url}</a> to <a href="{emulator_pathname}" style="text-decoration:none;">{emulator_pathname}</a>
+            '''.format(
+                system_name=emulator.system_name,
+                emulator_name=emulator.emulator_name,
+                emulator_url=emulator.emulator_url,
+                emulator_pathname=emulator_pathname
+            ).strip()
+
+            self._show_message(message)
+            return
+
+        if not roms:
+            roms_base_first_pathname = emulator.roms_search_path[0] if emulator.roms_search_path else ''
+            roms_first_pathname = emulator.roms_paths[0] if emulator.roms_paths else ''
+
+            roms_pathname = os.path.realpath(os.path.join(roms_base_first_pathname, roms_first_pathname) if (roms_base_first_pathname and roms_first_pathname) else os.path.sep)
+            formats = Utils.lists_to_string(emulator.run_patterns_roms_extensions, ' ').replace('*', '')
+
+            message = r'''
+            Please put yout roms for {system_name} ({emulator_name}) to <a href="{roms_pathname}" style="text-decoration:none;">{roms_pathname}</a> in {formats} format.
+            '''.format(
+                system_name=emulator.system_name,
+                emulator_name=emulator.emulator_name,
+                roms_pathname=roms_pathname,
+                formats=formats
+            ).strip()
+
+            self._show_message(message)
+            return
 
 
     def _adjust_gui(self):
@@ -988,6 +1057,7 @@ class MainWindow(QDialog):
             self._emu_selector.setCurrentIndex(default_emulator_index)
 
         self._update_current_emulator_tooltip()
+        self._show_warning_message()
 
 
     def _parse_emulator_config(self, emulator_config_section_name:str, emulator_config_section_data:dict):
@@ -1214,6 +1284,7 @@ class MainWindow(QDialog):
     def _emu_selector_current_index_changed(self, index):
         self._show_current_emulator_roms(True)
         self._update_current_emulator_tooltip()
+        self._show_warning_message()
 
 
     def _run_game_button_clicked(self):
