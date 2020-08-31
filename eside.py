@@ -349,6 +349,7 @@ class Emulator:
     def __init__(self,
         system_name: str,
         emulator_name: str,
+        emulator_url: str,
         exe_paths: List[str],
         run_patterns: List[str],
         roms_paths: List[str],
@@ -364,6 +365,7 @@ class Emulator:
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
+        self.emulator_url = emulator_url
         self.exe_paths = exe_paths
         self.run_patterns = run_patterns
         self.roms_paths = roms_paths
@@ -997,6 +999,7 @@ class MainWindow(QDialog):
         return {
             'system_name': emulator_config_section_data['system_name'].strip(),
             'emulator_name': emulator_config_section_data['emulator_name'].strip(),
+            'emulator_url': emulator_config_section_data['emulator_url'].strip(),
             'internal_name': emulator_config_section_name.strip(),
             'exe_paths': Utils.string_split_strip(
                 emulator_config_section_data['exe_paths'].replace('\\', os.sep),
