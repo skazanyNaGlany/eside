@@ -840,6 +840,7 @@ class MainWindow(QDialog):
         self._layout = QVBoxLayout(self)
         self._emu_selector = QComboBox()
         self._games_list = QListWidget()
+        self._message_label = QLabel()
         self._run_game_button = QPushButton('Run selected game')
         self._run_emulator_gui_button = QPushButton('Run emulator GUI')
         self._refresh_list_button = QPushButton('Refresh list')
@@ -847,8 +848,11 @@ class MainWindow(QDialog):
         self._about_button = QPushButton('About')
         self._exit_button = QPushButton('Exit')
 
+        self._message_label.setStyleSheet("background-color:white; border: 1px ridge gray")
+
         self._layout.addWidget(self._emu_selector)
         self._layout.addWidget(self._games_list)
+        self._layout.addWidget(self._message_label)
         self._layout.addWidget(self._run_game_button)
         self._layout.addWidget(self._run_emulator_gui_button)
         self._layout.addWidget(self._refresh_list_button)
