@@ -288,6 +288,10 @@ rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
 
+
+app = QApplication(sys.argv)
+
+
 # set False in production, True when developing
 typechecked_class_decorator_enabled = True
 
@@ -896,18 +900,25 @@ class MainWindow(QDialog):
         self._exit_button.clicked.connect(self._exit_button_clicked)
         self._refresh_list_button.clicked.connect(self._refresh_list_button_clicked)
 
+        app.installEventFilter(self)
+
         self._adjust_gui()
 
 
-    def keyPressEvent(self, event):
-        key = event.key()
+    def eventFilter(self, source, event):
+        if event.type() == QtCore.QEvent.KeyPress:
+            key = event.key()
 
-        if key == Qt.Key_Left:
-            self._switch_emulator(False)
-        elif key == Qt.Key_Right:
-            self._switch_emulator(True)
-        else:
-            super(MainWindow, self).keyPressEvent(event)
+            if key == Qt.Key_Left:
+                self._switch_emulator(False)
+
+                return True
+            elif key == Qt.Key_Right:
+                self._switch_emulator(True)
+
+                return True
+
+        return super(MainWindow, self).eventFilter(source, event)
 
 
     def _switch_emulator(self, down: bool):
@@ -1336,7 +1347,7 @@ class MainWindow(QDialog):
         return icon
 
 
-app = QApplication(sys.argv)
+
 
 main_window = MainWindow()
 main_window.show()
