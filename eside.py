@@ -1299,7 +1299,6 @@ class MainWindow(QDialog):
                 pixmap = QtGui.QPixmap(cover_file_pathname).scaled(500, 650, mode=QtCore.Qt.SmoothTransformation).scaledToHeight(games_list_size.height(), QtCore.Qt.SmoothTransformation)
                 self._cover_label.setPixmap(pixmap)
 
-                self._cover_label.setStyleSheet('background-color: black')
                 self._cover_label.show()
 
         except Exception as x:
