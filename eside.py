@@ -19,12 +19,13 @@ warnings.simplefilter('ignore', UserWarning)
 from typeguard import typechecked
 from typing import Optional, List
 
-from PySide2.QtWidgets import ( # pylint: disable=no-name-in-module
+from PySide2.QtWidgets import (                 # pylint: disable=no-name-in-module
     QApplication,
     QDialog,
     QLineEdit,
     QPushButton,
     QVBoxLayout,
+    QHBoxLayout,
     QListWidget,
     QLabel,
     QComboBox,
@@ -57,13 +58,14 @@ DEFAULT_CONFIG = r"""
 [global]
 systems_base_path = systems
 roms_base_path = roms
+covers_base_path = roms/covers
 bios_path = systems/bios
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.fs-uae
+default_emulator = emulator.mame
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -367,6 +369,15 @@ class Utils:
         joined = os.path.join(*paths)
 
         return Utils.adjust_to_system_path(joined)
+
+
+    @staticmethod
+    def find_file_from_list(files_list:list) -> Optional[str]:
+        for ifile in files_list:
+            if os.path.exists(ifile) and os.path.isfile(ifile):
+                return ifile
+
+        return None
 
 
 @typechecked_class_decorator()
@@ -833,9 +844,11 @@ class MainWindow(QDialog):
         self.setWindowFlag(Qt.WindowMinimizeButtonHint, True)
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
 
-        self._layout = QVBoxLayout(self)
+        self._main_layout = QVBoxLayout(self)
+        self._horizon_layout = QHBoxLayout()
         self._emu_selector = QComboBox()
         self._games_list = QListWidget()
+        self._cover_label = QLabel()
         self._message_label = QLabel()
         self._run_game_button = QPushButton('Run selected game')
         self._run_emulator_gui_button = QPushButton('Run emulator GUI')
@@ -850,21 +863,26 @@ class MainWindow(QDialog):
         self._message_label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self._message_label.setFont(QFont('Arial', 11))
 
-        self._layout.addWidget(self._emu_selector)
-        self._layout.addWidget(self._games_list)
-        self._layout.addWidget(self._message_label)
-        self._layout.addWidget(self._run_game_button)
-        self._layout.addWidget(self._run_emulator_gui_button)
-        self._layout.addWidget(self._refresh_list_button)
-        self._layout.addWidget(self._config_button)
-        self._layout.addWidget(self._about_button)
-        self._layout.addWidget(self._exit_button)
+        self._main_layout.addWidget(self._emu_selector)
+        self._main_layout.addLayout(self._horizon_layout)
+
+        self._horizon_layout.addWidget(self._games_list)
+        self._horizon_layout.addWidget(self._cover_label, 0, Qt.AlignHCenter)
+
+        self._main_layout.addWidget(self._message_label)
+        self._main_layout.addWidget(self._run_game_button)
+        self._main_layout.addWidget(self._run_emulator_gui_button)
+        self._main_layout.addWidget(self._refresh_list_button)
+        self._main_layout.addWidget(self._config_button)
+        self._main_layout.addWidget(self._about_button)
+        self._main_layout.addWidget(self._exit_button)
 
         self._config = self._parse_config()
         self._config_global_section = dict(self._config['global'].items())
 
         self._systems_base_path = self._config_global_section['systems_base_path']
         self._roms_base_path = self._config_global_section['roms_base_path']
+        self._covers_base_realpath = Utils.adjust_to_system_path(self._config_global_section['covers_base_path'])
         self._bios_path = self._config_global_section['bios_path']
         self._emulators = self._load_emulators()
 
@@ -873,6 +891,7 @@ class MainWindow(QDialog):
 
         self._emu_selector.currentIndexChanged.connect(self._emu_selector_current_index_changed)
         self._games_list.doubleClicked.connect(self._games_list_double_clicked)
+        self._games_list.currentRowChanged.connect(self._games_list_current_row_changed)
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
         self._run_emulator_gui_button.clicked.connect(self._run_emulator_gui_button_clicked)
         self._about_button.clicked.connect(self._about_button_clicked)
@@ -899,6 +918,14 @@ class MainWindow(QDialog):
                 return True
 
         return super(MainWindow, self).eventFilter(source, event)
+
+
+    def showEvent(self, event):
+        self._show_selected_game_cover()
+
+
+    def resizeEvent(self, event):
+        self._show_selected_game_cover()
 
 
     def _switch_emulator(self, down: bool):
@@ -1205,6 +1232,7 @@ class MainWindow(QDialog):
         fix_game_title = self._config_global_section['fix_game_title'] == '1'
 
         try:
+            self._games_list.blockSignals(True)
             self._games_list.clear()
 
             emulator = self._get_current_emulator()
@@ -1228,6 +1256,54 @@ class MainWindow(QDialog):
                 self._games_list.setFocus()
         except Exception as x:
             self._log_exception(x)
+        finally:
+            self._games_list.blockSignals(False)
+
+
+    def _show_selected_game_cover(self):
+        self._cover_label.hide()
+        self._cover_label.clear()
+
+        try:
+            current_index = self._games_list.currentIndex()
+
+            if not current_index:
+                return
+
+            current_emulator = self._get_current_emulator()
+
+            if current_emulator:
+                rom_path = self._get_rom_by_index(current_index.row())
+
+                if not rom_path:
+                    return
+
+                window_size = self.size()
+                games_list_size = self._games_list.size()
+                rom_basename = os.path.basename(rom_path)
+
+                search_paths = [
+                    os.path.join(self._covers_base_realpath, rom_basename + '.png'),
+                    os.path.join(self._covers_base_realpath, rom_basename + '.jpg'),
+                    os.path.join(self._covers_base_realpath, rom_basename + '.jpeg'),
+                    os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, rom_basename + '.png'),
+                    os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, rom_basename + '.jpg'),
+                    os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, rom_basename + '.jpeg'),
+                ]
+
+                cover_file_pathname = Utils.find_file_from_list(search_paths)
+
+                if not cover_file_pathname:
+                    return
+
+                pixmap = QtGui.QPixmap(cover_file_pathname).scaled(500, 650, mode=QtCore.Qt.SmoothTransformation).scaledToHeight(games_list_size.height(), QtCore.Qt.SmoothTransformation)
+                self._cover_label.setPixmap(pixmap)
+
+                self._cover_label.setStyleSheet('background-color: black')
+                self._cover_label.show()
+
+        except Exception as x:
+            self._log_exception(x)
 
 
     def _get_rom_by_index(self, index: int) -> Optional[str]:
@@ -1243,6 +1319,7 @@ class MainWindow(QDialog):
 
     def _refresh_list_button_clicked(self):
         self._show_current_emulator_roms(cached=False)
+        self._show_selected_game_cover()
 
 
     def _log_exception(self, x: Exception):
@@ -1279,8 +1356,13 @@ class MainWindow(QDialog):
 
     def _emu_selector_current_index_changed(self, index):
         self._show_current_emulator_roms(True)
+        self._show_selected_game_cover()
         self._update_current_emulator_tooltip()
         self._show_warning_message()
+
+
+    def _games_list_current_row_changed(self):
+        self._show_selected_game_cover()
 
 
     def _run_game_button_clicked(self):
