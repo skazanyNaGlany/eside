@@ -58,13 +58,12 @@ DEFAULT_CONFIG = r"""
 systems_base_path = systems
 roms_base_path = roms
 bios_path = systems/bios
-
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.mame
+default_emulator = emulator.fs-uae
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -358,6 +357,18 @@ class Utils:
         return separator.join(all_items)
 
 
+    @staticmethod
+    def adjust_to_system_path(path:str) -> str:
+        return os.path.realpath(os.path.normpath(path))
+
+
+    @staticmethod
+    def join_paths(*paths) -> str:
+        joined = os.path.join(*paths)
+
+        return Utils.adjust_to_system_path(joined)
+
+
 @typechecked_class_decorator()
 class Emulator:
     CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
@@ -368,15 +379,15 @@ class Emulator:
         emulator_name: str,
         emulator_url: str,
         exe_paths: List[str],
+        raw_exe_paths: List[str],
         run_patterns: List[str],
         roms_path: str,
+        raw_roms_path: str,
         run_patterns_roms_extensions: List[List[str]],
         rom_name_remove: List[str],
         internal_name: str,
         rom_basename_ignore: List[str],
         # globals:
-        systems_base_path: str,
-        roms_base_path: str,
         bios_path: str,
         custom_data: dict
     ):
@@ -384,14 +395,14 @@ class Emulator:
         self.emulator_name = emulator_name
         self.emulator_url = emulator_url
         self.exe_paths = exe_paths
+        self.raw_exe_paths = raw_exe_paths
         self.run_patterns = run_patterns
         self.roms_path = roms_path
+        self.raw_roms_path = raw_roms_path
         self.rom_name_remove = rom_name_remove
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
         self.internal_name = internal_name
         self.rom_basename_ignore = rom_basename_ignore
-        self.systems_base_path = systems_base_path
-        self.roms_base_path = roms_base_path
         self.bios_path = bios_path
         self.custom_data = custom_data
         self._cached_roms = None
@@ -403,12 +414,10 @@ class Emulator:
 
 
     def get_full_roms_path(self) -> Optional[str]:
-        roms_full_path = os.path.join(self.roms_base_path, self.roms_path)
-
-        if not os.path.exists(roms_full_path):
+        if not os.path.exists(self.roms_path):
             return None
 
-        return os.path.realpath(roms_full_path)
+        return os.path.realpath(self.roms_path)
 
 
     def _get_cue_bins(self, cue_pathname: str) -> list:
@@ -448,11 +457,11 @@ class Emulator:
         exe_pathname = None
 
         for ipath2 in self.exe_paths:
-            ipath2_full_pathname = os.path.join(self.systems_base_path, ipath2)
+            ipath2_full_pathname = ipath2
 
             exists = glob.glob(ipath2_full_pathname)
 
-            if len(exists):
+            if len(exists) and os.path.isfile(exists[0]):
                 exe_pathname = os.path.realpath(exists[0])
                 break
 
@@ -464,11 +473,11 @@ class Emulator:
                 exe_pathname = ipath2_basename_system
                 break
 
-            ipath2_full_pathname = os.path.join(self.systems_base_path, ipath2_basename)
+            ipath2_full_pathname = ipath2_basename
 
             exists = glob.glob(ipath2_full_pathname)
 
-            if len(exists):
+            if len(exists) and os.path.isfile(exists[0]):
                 exe_pathname = os.path.realpath(exists[0])
                 break
 
@@ -545,6 +554,9 @@ class Emulator:
                     continue
 
                 rom_config = self._find_rom_config(ifile.name)
+
+                if rom_config and 'hide' in rom_config and rom_config['hide'] == '1':
+                    continue
 
                 if rom_config and 'main_rom' in rom_config and rom_config['main_rom']:
                     if rom_config['main_rom'] != ifile.name:
@@ -929,36 +941,42 @@ class MainWindow(QDialog):
             return
 
         if not exe_pathname:
-            systems_first_pathname = emulator.systems_base_path if emulator.systems_base_path else ''
-            emulator_first_pathname = emulator.exe_paths[0].split(os.path.sep)[0] if emulator.exe_paths else ''
+            raw_emulator_pathnames = list(set([
+                Utils.join_paths(
+                    self._systems_base_path,
+                    iexe_path.split(os.path.sep)[0]
+                ) for iexe_path in emulator.raw_exe_paths
+            ]))
 
-            emulator_pathname = os.path.realpath(os.path.join(systems_first_pathname, emulator_first_pathname) if (systems_first_pathname and emulator_first_pathname) else os.path.sep)
+            emulator_pathnames = []
+            emulator_pathnames_str = ''
+
+            for ipath in raw_emulator_pathnames:
+                emulator_pathnames.append('<a href="{path}" style="text-decoration:none;">{path}</a>'.format(path=ipath))
+
+            emulator_pathnames_str = ' or '.join(emulator_pathnames).strip()
 
             message = r'''
-            Please install emulator for {system_name} ({emulator_name}) from <a href="{emulator_url}" style="text-decoration:none;">{emulator_url}</a> to <a href="{emulator_pathname}" style="text-decoration:none;">{emulator_pathname}</a>
+            Please install emulator for {system_name} ({emulator_name}) from <a href="{emulator_url}" style="text-decoration:none;">{emulator_url}</a> to {emulator_pathnames_str}
             '''.format(
                 system_name=emulator.system_name,
                 emulator_name=emulator.emulator_name,
                 emulator_url=emulator.emulator_url,
-                emulator_pathname=emulator_pathname
+                emulator_pathnames_str=emulator_pathnames_str
             ).strip()
 
             self._show_message(message)
             return
 
         if not roms:
-            roms_path = emulator.get_full_roms_path()
             formats = Utils.lists_to_string(emulator.run_patterns_roms_extensions, ' ').replace('*', '')
-
-            if not roms_path:
-                roms_path = os.path.join(self._roms_base_path, emulator.roms_path)
 
             message = r'''
             Please put yout roms for {system_name} ({emulator_name}) to <a href="{roms_path}" style="text-decoration:none;">{roms_path}</a> in {formats} format.
             '''.format(
                 system_name=emulator.system_name,
                 emulator_name=emulator.emulator_name,
-                roms_path=roms_path,
+                roms_path=emulator.roms_path,
                 formats=formats
             ).strip()
 
@@ -1021,7 +1039,7 @@ class MainWindow(QDialog):
 
 
     def _show_emulators(self):
-        default_emulator = self._config_global_section['default_emulator'].strip()
+        default_emulator = self._config_global_section['default_emulator']
         default_emulator_index = -1
 
         self._emu_selector.clear()
@@ -1039,7 +1057,7 @@ class MainWindow(QDialog):
         self._show_warning_message()
 
 
-    def _parse_emulator_config(self, emulator_config_section_name:str, emulator_config_section_data:dict):
+    def _prepare_emulator_config(self, emulator_config_section_name:str, emulator_config_section_data:dict):
         run_patterns = []
         run_patterns_roms_extensions = []
         rom_name_remove = []
@@ -1047,9 +1065,9 @@ class MainWindow(QDialog):
 
         for ikey in emulator_config_section_data:
             if ikey.startswith('run_pattern') and not ikey.endswith('_roms_extensions'):
-                roms_extensions = emulator_config_section_data[ikey + '_roms_extensions'].strip()
+                roms_extensions = emulator_config_section_data[ikey + '_roms_extensions']
 
-                run_patterns.append(emulator_config_section_data[ikey].strip())
+                run_patterns.append(emulator_config_section_data[ikey])
                 run_patterns_roms_extensions.append(
                     Utils.string_split_strip(roms_extensions.lower(), ',')
                 )
@@ -1063,16 +1081,22 @@ class MainWindow(QDialog):
             elif ikey.startswith('x_'):
                 custom_data[ikey] = emulator_config_section_data[ikey]
 
+        exe_paths = []
+        raw_exe_paths = Utils.string_split_strip(emulator_config_section_data['exe_paths'], ',')
+
+        for iexe_path_key, iexe_path in enumerate(raw_exe_paths):
+            exe_paths.append(Utils.join_paths(self._systems_base_path, iexe_path))
+
         return {
-            'system_name': emulator_config_section_data['system_name'].strip(),
-            'emulator_name': emulator_config_section_data['emulator_name'].strip(),
-            'emulator_url': emulator_config_section_data['emulator_url'].strip(),
-            'internal_name': emulator_config_section_name.strip(),
-            'exe_paths': Utils.string_split_strip(
-                emulator_config_section_data['exe_paths'].replace('\\', os.sep),
-                ','
-            ),
-            'roms_path': emulator_config_section_data['roms_path'].replace('\\', os.sep),
+            'system_name': emulator_config_section_data['system_name'],
+            'emulator_name': emulator_config_section_data['emulator_name'],
+            'emulator_url': emulator_config_section_data['emulator_url'],
+            'internal_name': emulator_config_section_name,
+            'exe_paths': exe_paths,
+            'raw_exe_paths': raw_exe_paths,
+            'roms_path': Utils.join_paths(self._roms_base_path, emulator_config_section_data['roms_path']),
+            'raw_roms_path': emulator_config_section_data['roms_path'],
+            'bios_path': Utils.adjust_to_system_path(self._bios_path),
             'run_patterns': run_patterns,
             'run_patterns_roms_extensions': run_patterns_roms_extensions,
             'rom_name_remove': rom_name_remove,
@@ -1118,11 +1142,7 @@ class MainWindow(QDialog):
                 continue
 
             isection_data = dict(self._config[isection_name].items())
-            emulator_config = self._parse_emulator_config(isection_name, isection_data)
-
-            emulator_config['systems_base_path'] = self._systems_base_path
-            emulator_config['roms_base_path'] = self._roms_base_path
-            emulator_config['bios_path'] = self._bios_path
+            emulator_config = self._prepare_emulator_config(isection_name, isection_data)
 
             iemulator = Emulator(**emulator_config)
 
