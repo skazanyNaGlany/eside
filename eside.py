@@ -33,7 +33,7 @@ from PySide2.QtWidgets import (                 # pylint: disable=no-name-in-mod
     QListWidgetItem
 )
 from PySide2 import QtCore, QtGui
-from PySide2.QtCore import Qt                   # pylint: disable=no-name-in-module
+from PySide2.QtCore import Qt, QTimer           # pylint: disable=no-name-in-module
 from PySide2.QtGui import QKeyEvent, QFont      # pylint: disable=no-name-in-module
 
 from configparser import ConfigParser
@@ -65,7 +65,7 @@ show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.mame
+default_emulator = emulator.epsxe
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -866,8 +866,13 @@ class MainWindow(QDialog):
         self._main_layout.addWidget(self._emu_selector)
         self._main_layout.addLayout(self._horizon_layout)
 
-        self._horizon_layout.addWidget(self._games_list)
-        self._horizon_layout.addWidget(self._cover_label, 0, Qt.AlignHCenter)
+        self._horizon_layout.addWidget(self._games_list, 50)
+        self._horizon_layout.addWidget(self._cover_label, 50)
+
+        self._cover_label.setStyleSheet('border: 1px ridge gray;')
+        self._cover_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+
+        self._games_list.setUniformItemSizes(True)
 
         self._main_layout.addWidget(self._message_label)
         self._main_layout.addWidget(self._run_game_button)
@@ -903,6 +908,16 @@ class MainWindow(QDialog):
 
         self._adjust_gui()
 
+        self._need_update_cover = True
+
+        self._timer = QTimer(self)
+        self._timer.timeout.connect(self._timerTimeout)
+        self._timer.start(10)
+
+
+    def _timerTimeout(self):
+        self._show_selected_game_cover()
+
 
     def eventFilter(self, source, event):
         if event.type() == QtCore.QEvent.KeyPress:
@@ -920,12 +935,8 @@ class MainWindow(QDialog):
         return super(MainWindow, self).eventFilter(source, event)
 
 
-    def showEvent(self, event):
-        self._show_selected_game_cover()
-
-
     def resizeEvent(self, event):
-        self._show_selected_game_cover()
+        self._need_update_cover = True
 
 
     def _switch_emulator(self, down: bool):
@@ -1024,9 +1035,13 @@ class MainWindow(QDialog):
 
         if show:
             self._games_list.hide()
+            self._cover_label.hide()
+
             self._message_label.show()
         else:
             self._games_list.show()
+            self._cover_label.show()
+
             self._message_label.hide()
 
         self._message_label.setText(message)
@@ -1261,13 +1276,22 @@ class MainWindow(QDialog):
 
 
     def _show_selected_game_cover(self):
-        self._cover_label.hide()
-        self._cover_label.clear()
+        if not self._need_update_cover:
+            return
+
+        if self._cover_label.isHidden():
+            self._cover_label.clear()
+            self._need_update_cover = False
+
+            return
 
         try:
             current_index = self._games_list.currentIndex()
 
             if not current_index:
+                self._cover_label.clear()
+                self._need_update_cover = False
+
                 return
 
             current_emulator = self._get_current_emulator()
@@ -1276,6 +1300,9 @@ class MainWindow(QDialog):
                 rom_path = self._get_rom_by_index(current_index.row())
 
                 if not rom_path:
+                    self._cover_label.clear()
+                    self._need_update_cover = False
+
                     return
 
                 window_size = self.size()
@@ -1294,15 +1321,18 @@ class MainWindow(QDialog):
                 cover_file_pathname = Utils.find_file_from_list(search_paths)
 
                 if not cover_file_pathname:
+                    self._cover_label.clear()
+                    self._need_update_cover = False
+
                     return
 
-                pixmap = QtGui.QPixmap(cover_file_pathname).scaled(500, 650, mode=QtCore.Qt.SmoothTransformation).scaledToHeight(games_list_size.height(), QtCore.Qt.SmoothTransformation)
+                pixmap = QtGui.QPixmap(cover_file_pathname).scaled(500, 650, aspectMode=QtCore.Qt.IgnoreAspectRatio, mode=QtCore.Qt.SmoothTransformation).scaledToHeight(self._cover_label.height(), QtCore.Qt.SmoothTransformation)
+
                 self._cover_label.setPixmap(pixmap)
-
-                self._cover_label.show()
-
         except Exception as x:
             self._log_exception(x)
+
+        self._need_update_cover = False
 
 
     def _get_rom_by_index(self, index: int) -> Optional[str]:
@@ -1318,7 +1348,7 @@ class MainWindow(QDialog):
 
     def _refresh_list_button_clicked(self):
         self._show_current_emulator_roms(cached=False)
-        self._show_selected_game_cover()
+        self._need_update_cover = True
 
 
     def _log_exception(self, x: Exception):
@@ -1355,13 +1385,13 @@ class MainWindow(QDialog):
 
     def _emu_selector_current_index_changed(self, index):
         self._show_current_emulator_roms(True)
-        self._show_selected_game_cover()
         self._update_current_emulator_tooltip()
         self._show_warning_message()
+        self._need_update_cover = True
 
 
     def _games_list_current_row_changed(self):
-        self._show_selected_game_cover()
+        self._need_update_cover = True
 
 
     def _run_game_button_clicked(self):
