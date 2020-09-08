@@ -30,7 +30,8 @@ from PySide2.QtWidgets import (                 # pylint: disable=no-name-in-mod
     QLabel,
     QComboBox,
     QMessageBox,
-    QListWidgetItem
+    QListWidgetItem,
+    QSizePolicy
 )
 from PySide2 import QtCore, QtGui
 from PySide2.QtCore import Qt, QTimer           # pylint: disable=no-name-in-module
@@ -65,7 +66,7 @@ show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 sort_emulators = 1
-default_emulator = emulator.epsxe
+default_emulator = emulator.mame
 fix_game_title = 1
 
 [emulator.epsxe]
@@ -866,11 +867,12 @@ class MainWindow(QDialog):
         self._main_layout.addWidget(self._emu_selector)
         self._main_layout.addLayout(self._horizon_layout)
 
-        self._horizon_layout.addWidget(self._games_list, 50)
-        self._horizon_layout.addWidget(self._cover_label, 50)
+        self._horizon_layout.addWidget(self._games_list, 55)
+        self._horizon_layout.addWidget(self._cover_label, 45)
 
         self._cover_label.setStyleSheet('border: 1px ridge gray;')
         self._cover_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+        self._cover_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
         self._games_list.setUniformItemSizes(True)
 
@@ -909,6 +911,7 @@ class MainWindow(QDialog):
         self._adjust_gui()
 
         self._need_update_cover = True
+        self._best_scales = {}
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._timerTimeout)
@@ -936,6 +939,7 @@ class MainWindow(QDialog):
 
 
     def resizeEvent(self, event):
+        self._best_scales = {}
         self._need_update_cover = True
 
 
@@ -1305,8 +1309,7 @@ class MainWindow(QDialog):
 
                     return
 
-                window_size = self.size()
-                games_list_size = self._games_list.size()
+                cover_label_size = self._cover_label.size()
                 rom_basename = os.path.basename(rom_path)
 
                 search_paths = [
@@ -1326,7 +1329,25 @@ class MainWindow(QDialog):
 
                     return
 
-                pixmap = QtGui.QPixmap(cover_file_pathname).scaled(500, 650, aspectMode=QtCore.Qt.IgnoreAspectRatio, mode=QtCore.Qt.SmoothTransformation).scaledToHeight(self._cover_label.height(), QtCore.Qt.SmoothTransformation)
+                pixmap = QtGui.QPixmap(cover_file_pathname)
+
+                if cover_file_pathname in self._best_scales and self._best_scales[cover_file_pathname] > 0:
+                    pixmap = pixmap.scaledToWidth(self._best_scales[cover_file_pathname], mode=QtCore.Qt.SmoothTransformation)
+                else:
+                    pixmap_size = pixmap.size()
+                    pixmap_original = pixmap
+                    new_width = pixmap_size.width()
+
+                    while pixmap_size.width() > cover_label_size.width() or pixmap_size.height() > cover_label_size.height():
+                        new_width = int(pixmap_size.width() - ((pixmap_size.width() / 100) * 10))
+
+                        pixmap = pixmap_original.scaledToWidth(new_width, mode=QtCore.Qt.SmoothTransformation)
+                        pixmap_size = pixmap.size()
+
+                        if pixmap_size.width() == 0:
+                            break
+
+                    self._best_scales[cover_file_pathname] = new_width
 
                 self._cover_label.setPixmap(pixmap)
         except Exception as x:
