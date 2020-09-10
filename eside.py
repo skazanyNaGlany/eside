@@ -871,6 +871,9 @@ class MainWindow(QDialog):
         self._horizon_layout.addWidget(self._games_list, 55)
         self._horizon_layout.addWidget(self._cover_label, 45)
 
+        self._emu_selector.setContentsMargins(0, 0, 0, 10)
+        self._horizon_layout.setContentsMargins(0, 0, 0, 10)
+
         self._cover_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
         self._cover_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
