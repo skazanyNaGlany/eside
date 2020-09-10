@@ -68,6 +68,7 @@ show_emulator_roms_count = 0
 sort_emulators = 1
 default_emulator = emulator.mame
 fix_game_title = 1
+covers_same_size = 1
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -1328,31 +1329,77 @@ class MainWindow(QDialog):
 
                     return
 
-                pixmap = QtGui.QPixmap(cover_file_pathname)
+                if current_emulator.internal_name not in self._best_scales:
+                    self._best_scales[current_emulator.internal_name] = {}
 
-                if cover_file_pathname in self._best_scales and self._best_scales[cover_file_pathname] > 0:
-                    pixmap = pixmap.scaledToWidth(self._best_scales[cover_file_pathname], mode=QtCore.Qt.SmoothTransformation)
-                else:
-                    pixmap_size = pixmap.size()
-                    pixmap_original = pixmap
-                    new_width = pixmap_size.width()
+                emulator_best_scales = self._best_scales[current_emulator.internal_name]
 
-                    while pixmap_size.width() > cover_label_size.width() or pixmap_size.height() > cover_label_size.height():
-                        new_width = int(pixmap_size.width() - ((pixmap_size.width() / 100) * 10))
+                covers_same_size = self._config_global_section['covers_same_size']
+                first_rom_cover_size = None
 
-                        pixmap = pixmap_original.scaledToWidth(new_width, mode=QtCore.Qt.SmoothTransformation)
-                        pixmap_size = pixmap.size()
+                if covers_same_size:
+                    first_rom_path = self._get_rom_by_index(0)
+                    first_rom_basename = os.path.basename(first_rom_path)
 
-                        if pixmap_size.width() == 0:
-                            break
+                    first_rom_cover_search_paths = [
+                        os.path.join(self._covers_base_realpath, first_rom_basename + '.png'),
+                        os.path.join(self._covers_base_realpath, first_rom_basename + '.jpg'),
+                        os.path.join(self._covers_base_realpath, first_rom_basename + '.jpeg'),
+                        os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, first_rom_basename + '.png'),
+                        os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, first_rom_basename + '.jpg'),
+                        os.path.join(self._covers_base_realpath, current_emulator.raw_roms_path, first_rom_basename + '.jpeg'),
+                    ]
 
-                    self._best_scales[cover_file_pathname] = new_width
+                    first_rom_cover_pathname = Utils.find_file_from_list(first_rom_cover_search_paths)
+
+                    if first_rom_cover_pathname:
+                        if first_rom_cover_pathname in emulator_best_scales:
+                            first_rom_cover_size = emulator_best_scales[first_rom_cover_pathname]
+                        else:
+                            first_rom_cover_size = self._rescale_cover(current_emulator, first_rom_cover_pathname, cover_label_size).size()
+
+                            first_rom_cover_size = (first_rom_cover_size.width(), first_rom_cover_size.height())
+
+                pixmap = self._rescale_cover(current_emulator, cover_file_pathname, cover_label_size, first_rom_cover_size)
 
                 self._cover_label.setPixmap(pixmap)
         except Exception as x:
             self._log_exception(x)
 
         self._need_update_cover = False
+
+
+    def _rescale_cover(self, emulator:Emulator, cover_file_pathname:str, cover_label_size:QtCore.QSize, first_rom_cover_size:Optional[tuple] = None) -> QtGui.QPixmap:
+        emulator_best_scales = self._best_scales[emulator.internal_name]
+
+        pixmap = QtGui.QPixmap(cover_file_pathname)
+        rescaled = False
+
+        if first_rom_cover_size:
+            pixmap = pixmap.scaled(first_rom_cover_size[0], first_rom_cover_size[1], mode=QtCore.Qt.SmoothTransformation)
+
+            rescaled = True
+
+        if not rescaled:
+            if cover_file_pathname in emulator_best_scales and emulator_best_scales[cover_file_pathname][0] > 0:
+                pixmap = pixmap.scaled(emulator_best_scales[cover_file_pathname][0], emulator_best_scales[cover_file_pathname][1], mode=QtCore.Qt.SmoothTransformation)
+            else:
+                pixmap_size = pixmap.size()
+                pixmap_original = pixmap
+                new_width = pixmap_size.width()
+
+                while pixmap_size.width() > cover_label_size.width() or pixmap_size.height() > cover_label_size.height():
+                    new_width = int(pixmap_size.width() - ((pixmap_size.width() / 100) * 10))
+
+                    pixmap = pixmap_original.scaledToWidth(new_width, mode=QtCore.Qt.SmoothTransformation)
+                    pixmap_size = pixmap.size()
+
+                    if pixmap_size.width() == 0:
+                        break
+
+                emulator_best_scales[cover_file_pathname] = (int(pixmap_size.width()), int(pixmap_size.height()))
+
+        return pixmap
 
 
     def _get_rom_by_index(self, index: int) -> Optional[str]:
