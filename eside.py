@@ -933,10 +933,12 @@ class MainWindow(QDialog):
         copy_game_name_action = QAction('&Copy game name', self, triggered = self._games_list_copy_game_name)
         copy_system_game_name_action = QAction('Copy &system && game name', self, triggered = self._games_list_copy_system_game_name)
         google_game = QAction('&Google it', self, triggered = self._games_list_google_game)
+        run_game = QAction('&Run', self, triggered = self._run_selected_game)
 
         right_menu.addAction(copy_game_name_action)
         right_menu.addAction(copy_system_game_name_action)
         right_menu.addAction(google_game)
+        right_menu.addAction(run_game)
 
         right_menu.exec_(QtGui.QCursor.pos())
 
