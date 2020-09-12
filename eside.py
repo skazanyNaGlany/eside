@@ -930,9 +930,9 @@ class MainWindow(QDialog):
     def _games_list_right_menu(self):
         right_menu = QMenu(self._games_list)
 
-        copy_game_name_action = QAction('Copy game name', self, triggered = self._games_list_copy_game_name)
-        copy_system_game_name_action = QAction('Copy system && game name', self, triggered = self._games_list_copy_system_game_name)
-        google_game = QAction('Google it', self, triggered = self._games_list_google_game)
+        copy_game_name_action = QAction('&Copy game name', self, triggered = self._games_list_copy_game_name)
+        copy_system_game_name_action = QAction('Copy &system && game name', self, triggered = self._games_list_copy_system_game_name)
+        google_game = QAction('&Google it', self, triggered = self._games_list_google_game)
 
         right_menu.addAction(copy_game_name_action)
         right_menu.addAction(copy_system_game_name_action)
