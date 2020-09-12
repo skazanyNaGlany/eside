@@ -31,11 +31,13 @@ from PySide2.QtWidgets import (                 # pylint: disable=no-name-in-mod
     QComboBox,
     QMessageBox,
     QListWidgetItem,
-    QSizePolicy
+    QSizePolicy,
+    QMenu,
+    QAction
 )
 from PySide2 import QtCore, QtGui
-from PySide2.QtCore import Qt, QTimer           # pylint: disable=no-name-in-module
-from PySide2.QtGui import QKeyEvent, QFont      # pylint: disable=no-name-in-module
+from PySide2.QtCore import Qt, QTimer                           # pylint: disable=no-name-in-module
+from PySide2.QtGui import QKeyEvent, QFont, QGuiApplication     # pylint: disable=no-name-in-module
 
 from configparser import ConfigParser
 
@@ -859,6 +861,8 @@ class MainWindow(QDialog):
         self._about_button = QPushButton('About')
         self._exit_button = QPushButton('Exit')
 
+        self._clipboard = QGuiApplication.clipboard()
+
         self._message_label.setStyleSheet('background-color: white; border: 1px ridge gray; padding: 15px;')
         self._message_label.setOpenExternalLinks(True)
         self._message_label.setWordWrap(True)
@@ -878,6 +882,8 @@ class MainWindow(QDialog):
         self._cover_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
         self._games_list.setUniformItemSizes(True)
+        self._games_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self._games_list.customContextMenuRequested[QtCore.QPoint].connect(self._games_list_right_menu)
 
         self._main_layout.addWidget(self._message_label)
         self._main_layout.addWidget(self._run_game_button)
@@ -919,6 +925,20 @@ class MainWindow(QDialog):
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._timerTimeout)
         self._timer.start(10)
+
+
+    def _games_list_right_menu(self):
+        right_menu = QMenu(self._games_list)
+
+        copy_game_name_action = QAction('Copy game name', self, triggered = self._games_list_copy_game_name)
+        copy_system_game_name_action = QAction('Copy system && game name', self, triggered = self._games_list_copy_system_game_name)
+        google_game = QAction('Google it', self, triggered = self._games_list_google_game)
+
+        right_menu.addAction(copy_game_name_action)
+        right_menu.addAction(copy_system_game_name_action)
+        right_menu.addAction(google_game)
+
+        right_menu.exec_(QtGui.QCursor.pos())
 
 
     def _timerTimeout(self):
@@ -1458,6 +1478,47 @@ class MainWindow(QDialog):
         self._update_current_emulator_tooltip()
         self._show_warning_message()
         self._need_update_cover = True
+
+
+    def _games_list_copy_game_name(self):
+        current_row = self._games_list.currentItem()
+
+        if not current_row:
+            return
+
+        self._clipboard.setText(current_row.text())
+
+
+    def _get_current_system_n_game_name(self) -> Optional[str]:
+        current_emulator = self._get_current_emulator()
+        current_row = self._games_list.currentItem()
+
+        if not current_row:
+            return None
+
+        return current_emulator.system_name + ' ' + current_row.text()
+
+
+    def _games_list_copy_system_game_name(self):
+        system_game_name = self._get_current_system_n_game_name()
+
+        if not system_game_name:
+            return
+
+        self._clipboard.setText(system_game_name)
+
+
+    def _games_list_google_game(self):
+        system_game_name = self._get_current_system_n_game_name()
+
+        if not system_game_name:
+            return
+
+        url = QtCore.QUrl('https://www.google.com/search?q={system_game_name}'.format(
+            system_game_name=system_game_name
+        ))
+
+        QtGui.QDesktopServices.openUrl(url)
 
 
     def _games_list_current_row_changed(self):
