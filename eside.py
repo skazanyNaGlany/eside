@@ -951,11 +951,13 @@ class MainWindow(QDialog):
 
         copy_game_name_action = QAction('&Copy game name', self, triggered = self._games_list_copy_game_name)
         copy_system_game_name_action = QAction('Copy &system && game name', self, triggered = self._games_list_copy_system_game_name)
+        copy_rom_pathname_action = QAction('Copy rom &location', self, triggered = self._games_list_copy_rom_pathname)
         google_game = QAction('&Google it', self, triggered = self._games_list_google_game)
         run_game = QAction('&Run', self, triggered = self._run_selected_game)
 
         right_menu.addAction(copy_game_name_action)
         right_menu.addAction(copy_system_game_name_action)
+        right_menu.addAction(copy_rom_pathname_action)
         right_menu.addAction(google_game)
         right_menu.addAction(run_game)
 
@@ -1527,6 +1529,27 @@ class MainWindow(QDialog):
             return
 
         self._clipboard.setText(system_game_name)
+
+
+    def _games_list_copy_rom_pathname(self):
+        current_index = self._games_list.currentIndex()
+
+        if not current_index:
+            return
+
+        current_emulator = self._get_current_emulator()
+
+        if not current_emulator:
+            return
+
+        rom_path = self._get_rom_by_index(current_index.row())
+
+        if not rom_path:
+            return
+
+        rom_full_path = os.path.abspath(rom_path)
+
+        self._clipboard.setText(rom_full_path)
 
 
     def _games_list_google_game(self):
