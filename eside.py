@@ -79,6 +79,7 @@ system_name = Sony PlayStation
 emulator_name = ePSXe
 emulator_url = https://www.epsxe.com/
 exe_paths = epsxe/ePSXe.exe, epsxe/epsxe_x64
+gui_paths =
 roms_path = psx
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -loadbin "{rom_path}" -nogui
@@ -91,6 +92,7 @@ system_name = Sony PlayStation 2
 emulator_name = PCSX2
 emulator_url = https://pcsx2.net/
 exe_paths = pcsx2/pcsx2.exe, pcsx2/PCSX2
+gui_paths =
 roms_path = ps2
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --nogui --fullboot
@@ -104,6 +106,7 @@ system_name = Sony PlayStation Portable
 emulator_name = PPSSPP
 emulator_url = https://www.ppsspp.org/
 exe_paths = ppsspp/PPSSPPWindows.exe, ppsspp/PPSSPPSDL
+gui_paths =
 roms_path = psp
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen --escape-exit --pause-menu-exit
@@ -117,6 +120,7 @@ system_name = Nintendo GameCube
 emulator_name = Dolphin
 emulator_url = https://dolphin-emu.org/
 exe_paths = dolphin/Dolphin.exe, dolphin-emu
+gui_paths =
 roms_path = gc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
@@ -129,6 +133,7 @@ system_name = Nintendo Wii
 emulator_name = Dolphin
 emulator_url = https://dolphin-emu.org/
 exe_paths = dolphin/Dolphin.exe, dolphin-emu
+gui_paths =
 roms_path = wii
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -b -e "{rom_path}"
@@ -141,6 +146,7 @@ system_name = Nintendo Wii U
 emulator_name = Cemu
 emulator_url = https://cemu.info/
 exe_paths = cemu/Cemu.exe
+gui_paths =
 roms_path = wiiu
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -f -g "{rom_path}"
@@ -153,6 +159,7 @@ system_name = Sega Dreamcast
 emulator_name = Redream
 emulator_url = https://redream.io/
 exe_paths = redream/redream.exe, redream/redream
+gui_paths =
 roms_path = dreamcast
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -165,6 +172,7 @@ system_name = Microsoft XBox 360
 emulator_name = Xenia
 emulator_url = https://xenia.jp/
 exe_paths = xenia/xenia.exe
+gui_paths =
 roms_path = x360
 rom_basename_ignore = *.log
 run_pattern0 = "{exe_path}" "{rom_path}" --fullscreen
@@ -177,6 +185,7 @@ system_name = Nintendo Game Boy
 emulator_name = VisualBoyAdvance-M
 emulator_url = https://vba-m.com/
 exe_paths = vba-m/visualboyadvance-m.exe
+gui_paths =
 roms_path = gb
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
@@ -189,6 +198,7 @@ system_name = Nintendo Game Boy Color
 emulator_name = VisualBoyAdvance-M
 emulator_url = https://vba-m.com/
 exe_paths = vba-m/visualboyadvance-m.exe
+gui_paths =
 roms_path = gbc
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
@@ -201,6 +211,7 @@ system_name = Nintendo Game Boy Advance
 emulator_name = VisualBoyAdvance-M
 emulator_url = https://vba-m.com/
 exe_paths = vba-m/visualboyadvance-m.exe
+gui_paths =
 roms_path = gba
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" /f "{rom_path}"
@@ -213,6 +224,7 @@ system_name = Arcade
 emulator_name = MAME
 emulator_url = https://www.mamedev.org/
 exe_paths = mame/mame64.exe, mame
+gui_paths =
 roms_path = arcade
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -rompath "{roms_path}" "{rom_path}"
@@ -225,6 +237,7 @@ system_name = Nintendo Entertainment System
 emulator_name = FCEUX
 emulator_url = http://fceux.com/web/home.html
 exe_paths = fceux/fceux.exe
+gui_paths =
 roms_path = nes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -237,6 +250,7 @@ system_name = Super Nintendo Entertainment System
 emulator_name = SNES9X
 emulator_url = http://www.snes9x.com/
 exe_paths = snes9x/snes9x*.exe
+gui_paths =
 roms_path = snes
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" -fullscreen "{rom_path}"
@@ -249,6 +263,7 @@ system_name = Nintendo 64
 emulator_name = Project64
 emulator_url = https://www.pj64-emu.com/
 exe_paths = project64/Project64.exe
+gui_paths =
 roms_path = n64
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -261,6 +276,7 @@ system_name = Nintendo DS
 emulator_name = DeSmuME
 emulator_url = http://desmume.org/
 exe_paths = desmume/DeSmuME*.exe
+gui_paths =
 roms_path = nds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -274,6 +290,7 @@ system_name = Nintendo 3DS
 emulator_name = Citra
 emulator_url = https://citra-emu.org/
 exe_paths = citra/nightly-mingw/citra-qt.exe
+gui_paths =
 roms_path = 3ds
 rom_basename_ignore =
 run_pattern0 = "{exe_path}" "{rom_path}"
@@ -285,7 +302,8 @@ rom_name_remove1 = \(.*\)
 system_name = Commodore Amiga
 emulator_name = FS-UAE
 emulator_url = https://fs-uae.net/
-exe_paths = fs-uae/System/FS-UAE/Windows/x86-64/fs-uae.exe, fs-uae/FS-UAE/Windows/x86-64/fs-uae.exe, fs-uae/System/FS-UAE/Linux/x86-64/fs-uae, fs-uae/FS-UAE/Linux/x86-64/fs-uae
+exe_paths = fs-uae/System/FS-UAE/Windows/x86-64/fs-uae.exe, fs-uae/Windows/x86-64/fs-uae.exe, fs-uae/System/FS-UAE/Linux/x86-64/fs-uae, fs-uae/FS-UAE/Linux/x86-64/fs-uae
+gui_paths = fs-uae/Launcher.exe, fs-uae/Launcher
 roms_path = amiga
 rom_basename_ignore =
 x_floppy_drive_speed = 0
@@ -396,6 +414,7 @@ class Emulator:
         emulator_name: str,
         emulator_url: str,
         exe_paths: List[str],
+        gui_paths: List[str],
         raw_exe_paths: List[str],
         run_patterns: List[str],
         roms_path: str,
@@ -412,6 +431,7 @@ class Emulator:
         self.emulator_name = emulator_name
         self.emulator_url = emulator_url
         self.exe_paths = exe_paths
+        self.gui_paths = gui_paths
         self.raw_exe_paths = raw_exe_paths
         self.run_patterns = run_patterns
         self.roms_path = roms_path
@@ -424,6 +444,7 @@ class Emulator:
         self.custom_data = custom_data
         self._cached_roms = None
         self._cached_exe_pathname = None
+        self._cached_gui_exe_pathname = None
         self._cached_roms_pathname = None
         self._cached_bios_pathname = None
 
@@ -501,6 +522,51 @@ class Emulator:
         self._cached_exe_pathname = exe_pathname
 
         return exe_pathname
+
+
+    def _get_gui_executable(self, cached: bool = True) -> Optional[str]:
+        if cached and self._cached_gui_exe_pathname is not None:
+            return self._cached_gui_exe_pathname
+
+        exe_pathname = None
+
+        for ipath2 in self.gui_paths:
+            ipath2_full_pathname = ipath2
+
+            exists = glob.glob(ipath2_full_pathname)
+
+            if len(exists) and os.path.isfile(exists[0]):
+                exe_pathname = os.path.realpath(exists[0])
+                break
+
+            ipath2_basename = os.path.basename(ipath2)
+
+            ipath2_basename_system = shutil.which(ipath2_basename)
+
+            if ipath2_basename_system:
+                exe_pathname = ipath2_basename_system
+                break
+
+            ipath2_full_pathname = ipath2_basename
+
+            exists = glob.glob(ipath2_full_pathname)
+
+            if len(exists) and os.path.isfile(exists[0]):
+                exe_pathname = os.path.realpath(exists[0])
+                break
+
+        self._cached_gui_exe_pathname = exe_pathname
+
+        return exe_pathname
+
+
+    def get_gui_executable(self, cached: bool = True) -> Optional[str]:
+        exe_pathname = self._get_gui_executable(cached)
+
+        if exe_pathname:
+            return exe_pathname
+
+        return self.get_emulator_executable(cached)
 
 
     def _ignore_file(self, filename:str) -> bool:
@@ -825,7 +891,7 @@ class Emulator:
 
 
     def run_gui(self) -> subprocess:
-        exe_path = self.get_emulator_executable()
+        exe_path = self.get_gui_executable()
 
         if not exe_path:
             self._raise_no_exe_exception()
@@ -1181,12 +1247,19 @@ class MainWindow(QDialog):
         for iexe_path_key, iexe_path in enumerate(raw_exe_paths):
             exe_paths.append(Utils.join_paths(self._systems_base_path, iexe_path))
 
+        gui_paths = []
+        raw_gui_paths = Utils.string_split_strip(emulator_config_section_data['gui_paths'], ',')
+
+        for igui_path_key, igui_path in enumerate(raw_gui_paths):
+            gui_paths.append(Utils.join_paths(self._systems_base_path, igui_path))
+
         return {
             'system_name': emulator_config_section_data['system_name'],
             'emulator_name': emulator_config_section_data['emulator_name'],
             'emulator_url': emulator_config_section_data['emulator_url'],
             'internal_name': emulator_config_section_name,
             'exe_paths': exe_paths,
+            'gui_paths': gui_paths,
             'raw_exe_paths': raw_exe_paths,
             'roms_path': Utils.join_paths(self._roms_base_path, emulator_config_section_data['roms_path']),
             'raw_roms_path': emulator_config_section_data['roms_path'],
