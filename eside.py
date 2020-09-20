@@ -1009,8 +1009,9 @@ class MainWindow(QDialog):
         self._games_list.currentRowChanged.connect(self._games_list_current_row_changed)
 
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
-        self._antimicro_profile_button.clicked.connect(self._antimicro_profile_button_clicked)
 
+        if self._antimicro_profile_button:
+            self._antimicro_profile_button.clicked.connect(self._antimicro_profile_button_clicked)
 
         if show_other_buttons:
             self._run_emulator_gui_button.clicked.connect(self._run_emulator_gui_button_clicked)
