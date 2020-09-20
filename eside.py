@@ -73,6 +73,8 @@ sort_emulators = 1
 default_emulator = emulator.mame
 fix_game_title = 1
 covers_same_size = 1
+antimicro_path = systems/antimicro
+antimicro_profiles_path = systems/antimicro/profiles
 
 [emulator.epsxe]
 system_name = Sony PlayStation
@@ -916,6 +918,14 @@ class MainWindow(QDialog):
         minimum_window_height = int(self._config_global_section['minimum_window_height'])
         show_other_buttons = self._config_global_section['show_other_buttons'] == '1'
 
+        self._antimicro_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_path'])
+        self._antimicro_profiles_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_profiles_path'])
+
+        self._need_update_cover = True
+        self._best_scales = {}
+        self._antimicro_profiles = []
+        self._selected_antimicro_profile = None
+
         self.setWindowTitle(APP_NAME)
         self.setMinimumSize(minimum_window_width, minimum_window_height)
         self.setWindowIcon(self._icon_from_base64(APP_ICON))
@@ -930,6 +940,11 @@ class MainWindow(QDialog):
         self._cover_label = QLabel()
         self._message_label = QLabel()
         self._run_game_button = QPushButton('Run selected game')
+
+        self._antimicro_profile_button = None
+
+        if os.path.exists(self._antimicro_profiles_path) and os.path.exists(self._antimicro_profiles_path):
+            self._antimicro_profile_button = QPushButton('AntiMicro profile: None')
 
         if show_other_buttons:
             self._run_emulator_gui_button = QPushButton('Run emulator GUI')
@@ -966,6 +981,9 @@ class MainWindow(QDialog):
 
         self._main_layout.addWidget(self._run_game_button)
 
+        if self._antimicro_profile_button:
+            self._main_layout.addWidget(self._antimicro_profile_button)
+
         if show_other_buttons:
             self._main_layout.addWidget(self._run_emulator_gui_button)
             self._main_layout.addWidget(self._refresh_list_button)
@@ -987,6 +1005,8 @@ class MainWindow(QDialog):
         self._games_list.currentRowChanged.connect(self._games_list_current_row_changed)
 
         self._run_game_button.clicked.connect(self._run_game_button_clicked)
+        self._antimicro_profile_button.clicked.connect(self._antimicro_profile_button_clicked)
+
 
         if show_other_buttons:
             self._run_emulator_gui_button.clicked.connect(self._run_emulator_gui_button_clicked)
@@ -998,9 +1018,6 @@ class MainWindow(QDialog):
         app.installEventFilter(self)
 
         self._adjust_gui()
-
-        self._need_update_cover = True
-        self._best_scales = {}
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self._timerTimeout)
@@ -1078,6 +1095,8 @@ class MainWindow(QDialog):
 
         self._emu_selector.setCurrentIndex(current_index)
         self._update_current_emulator_tooltip()
+        self._load_antimicro_profiles()
+        self._switch_antimicro_profile(1)
         self._show_warning_message()
 
 
@@ -1198,6 +1217,79 @@ class MainWindow(QDialog):
             self._emu_selector.setToolTip('')
 
 
+    def _load_antimicro_profiles(self):
+        self._antimicro_profiles = []
+        self._selected_antimicro_profile = None
+
+        if not os.path.exists(self._antimicro_path) or not os.path.exists(self._antimicro_profiles_path):
+            return
+
+        current_emulator_index = self._emu_selector.currentIndex()
+
+        if current_emulator_index <= -1:
+            return None
+
+        emulator = self._emulators[current_emulator_index]
+        profiles = sorted(list(pathlib.Path(self._antimicro_profiles_path).rglob('*.gamecontroller.amgp')))
+
+        for iprofile in profiles:
+            if not iprofile.name.startswith(emulator.internal_name):
+                continue
+
+            self._antimicro_profiles.append(str(iprofile))
+
+
+    def _format_antimicro_profile_name(self, profile_pathname:str) -> str:
+        profile_basename = os.path.basename(profile_pathname)
+
+        profile_basename_parts = profile_basename.split('.', 2)
+
+        if len(profile_basename_parts) < 3:
+            return profile_basename.replace('.gamecontroller.amgp', '')
+
+        return profile_basename_parts[2].replace('.gamecontroller.amgp', '')
+
+
+    def _switch_antimicro_profile(self, direction:int):
+        if self._antimicro_profile_button:
+            self._antimicro_profile_button.setText('AntiMicro profile: None')
+
+        if not direction or not self._antimicro_profile_button:
+            self._selected_antimicro_profile = None
+
+            return
+
+        antimicro_profiles_copy = self._antimicro_profiles.copy()
+        antimicro_profiles_copy.insert(0, None)
+
+        current_index = 0
+        len_antimicro_profiles = len(antimicro_profiles_copy)
+
+        if self._selected_antimicro_profile:
+            current_index = self._selected_antimicro_profile
+
+        if direction == -1:
+            current_index -= 1
+
+            if current_index < 0:
+                current_index = len_antimicro_profiles - 1
+        elif direction == 1:
+            current_index += 1
+
+            if current_index >= len_antimicro_profiles:
+                current_index = 0
+
+        if not antimicro_profiles_copy[current_index]:
+            self._antimicro_profile_button.setText('AntiMicro profile: None')
+            self._selected_antimicro_profile = None
+
+            return
+
+        self._selected_antimicro_profile = current_index
+        self._antimicro_profile_button.setText(
+            'AntiMicro profile: ' + self._format_antimicro_profile_name(antimicro_profiles_copy[current_index]))
+
+
     def _show_emulators(self):
         default_emulator = self._config_global_section['default_emulator']
         default_emulator_index = -1
@@ -1214,6 +1306,8 @@ class MainWindow(QDialog):
             self._emu_selector.setCurrentIndex(default_emulator_index)
 
         self._update_current_emulator_tooltip()
+        self._load_antimicro_profiles()
+        self._switch_antimicro_profile(1)
         self._show_warning_message()
 
 
@@ -1574,6 +1668,8 @@ class MainWindow(QDialog):
     def _emu_selector_current_index_changed(self, index):
         self._show_current_emulator_roms(True)
         self._update_current_emulator_tooltip()
+        self._load_antimicro_profiles()
+        self._switch_antimicro_profile(1)
         self._show_warning_message()
         self._need_update_cover = True
 
@@ -1662,6 +1758,10 @@ class MainWindow(QDialog):
 
     def _run_game_button_clicked(self):
         self._run_selected_game()
+
+
+    def _antimicro_profile_button_clicked(self):
+        self._switch_antimicro_profile(1)
 
 
     def _run_emulator_gui_button_clicked(self):
