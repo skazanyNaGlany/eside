@@ -925,6 +925,8 @@ class MainWindow(QDialog):
         self._best_scales = {}
         self._antimicro_profiles = []
         self._selected_antimicro_profile = None
+        self._antimicro_process = None
+        self._emulator_process = None
 
         self.setWindowTitle(APP_NAME)
         self.setMinimumSize(minimum_window_width, minimum_window_height)
@@ -1019,9 +1021,13 @@ class MainWindow(QDialog):
 
         self._adjust_gui()
 
-        self._timer = QTimer(self)
-        self._timer.timeout.connect(self._timerTimeout)
-        self._timer.start(10)
+        self._cover_timer = QTimer(self)
+        self._cover_timer.timeout.connect(self._cover_timer_timeout)
+        self._cover_timer.start(10)
+
+        self._antimicro_timer = QTimer(self)
+        self._antimicro_timer.timeout.connect(self._antimicro_timer_timeout)
+        self._antimicro_timer.start(500)
 
         start_maximized = self._config_global_section['start_maximized'] == '1'
 
@@ -1049,8 +1055,31 @@ class MainWindow(QDialog):
         right_menu.exec_(QtGui.QCursor.pos())
 
 
-    def _timerTimeout(self):
+    def _cover_timer_timeout(self):
         self._show_selected_game_cover()
+
+
+    def _antimicro_timer_timeout(self):
+        if not self._antimicro_process:
+            return
+
+        if not self._emulator_process:
+            if self._antimicro_process:
+                self._antimicro_process.terminate()
+                self._antimicro_process = None
+
+            return
+
+        if self._emulator_process.poll() is None:
+            # still running
+            return
+
+        self._emulator_process = None
+
+        # emulator process terminated
+        # terminate antimicro
+        self._antimicro_process.terminate()
+        self._antimicro_process = None
 
 
     def eventFilter(self, source, event):
@@ -1656,13 +1685,40 @@ class MainWindow(QDialog):
                     rom_full_path = os.path.abspath(rom_path)
 
                     print('Running rom: ' + rom_full_path)
-                    current_emulator.run_rom(rom_full_path)
+                    self._emulator_process = current_emulator.run_rom(rom_full_path)
+
+                    self._run_antimicro()
         except Exception as x:
             self._log_exception(x)
 
 
     def _games_list_double_clicked(self):
         self._run_selected_game()
+
+
+    def _run_antimicro(self):
+        if not self._selected_antimicro_profile or self._antimicro_process:
+            return
+
+        exe_path = os.path.join(self._antimicro_path, 'antimicro.exe')
+
+        if not os.path.exists(exe_path):
+            exe_path = os.path.join(self._antimicro_path, 'antimicro')
+
+            if not os.path.exists(exe_path):
+                print('AntiMicro executable not found')
+
+                return
+
+        profile_pathname = self._antimicro_profiles[self._selected_antimicro_profile - 1]
+
+        self._antimicro_process = subprocess.Popen([
+            exe_path,
+            '--tray',
+            '--hidden',
+            '--profile',
+            profile_pathname
+        ])
 
 
     def _emu_selector_current_index_changed(self, index):
