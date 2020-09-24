@@ -71,6 +71,7 @@ show_non_exe_emulator = 1
 show_emulator_name = 0
 show_emulator_roms_count = 0
 show_other_buttons = 1
+show_covers = 0
 sort_emulators = 1
 default_emulator = emulator.mame
 fix_game_title = 1
@@ -919,6 +920,7 @@ class MainWindow(QDialog):
         minimum_window_width = int(self._config_global_section['minimum_window_width'])
         minimum_window_height = int(self._config_global_section['minimum_window_height'])
         show_other_buttons = self._config_global_section['show_other_buttons'] == '1'
+        self._show_covers = self._config_global_section['show_covers'] == '1'
 
         self._antimicro_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_path'])
         self._antimicro_profiles_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_profiles_path'])
@@ -941,9 +943,12 @@ class MainWindow(QDialog):
         self._horizon_layout = QHBoxLayout()
         self._emu_selector = QComboBox()
         self._games_list = QListWidget()
-        self._cover_label = QLabel()
         self._message_label = QLabel()
         self._run_game_button = QPushButton('Run selected game')
+        self._cover_label = None
+
+        if self._show_covers:
+            self._cover_label = QLabel()
 
         self._antimicro_profile_button = None
 
@@ -969,13 +974,16 @@ class MainWindow(QDialog):
         self._main_layout.addLayout(self._horizon_layout)
 
         self._horizon_layout.addWidget(self._games_list, 55)
-        self._horizon_layout.addWidget(self._cover_label, 45)
+
+        if self._show_covers:
+            self._horizon_layout.addWidget(self._cover_label, 45)
 
         self._emu_selector.setContentsMargins(0, 0, 0, 10)
         self._horizon_layout.setContentsMargins(0, 0, 0, 10)
 
-        self._cover_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
-        self._cover_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        if self._show_covers:
+            self._cover_label.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
+            self._cover_label.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
         self._games_list.setUniformItemSizes(True)
         self._games_list.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -1024,9 +1032,12 @@ class MainWindow(QDialog):
 
         self._adjust_gui()
 
-        self._cover_timer = QTimer(self)
-        self._cover_timer.timeout.connect(self._cover_timer_timeout)
-        self._cover_timer.start(10)
+        if self._show_covers:
+            self._cover_timer = QTimer(self)
+            self._cover_timer.timeout.connect(self._cover_timer_timeout)
+            self._cover_timer.start(10)
+        else:
+            self._need_update_cover = False
 
         self._antimicro_timer = QTimer(self)
         self._antimicro_timer.timeout.connect(self._antimicro_timer_timeout)
@@ -1204,12 +1215,16 @@ class MainWindow(QDialog):
 
         if show:
             self._games_list.hide()
-            self._cover_label.hide()
+
+            if self._show_covers:
+                self._cover_label.hide()
 
             self._message_label.show()
         else:
             self._games_list.show()
-            self._cover_label.show()
+
+            if self._show_covers:
+                self._cover_label.show()
 
             self._message_label.hide()
 
@@ -1527,7 +1542,7 @@ class MainWindow(QDialog):
 
 
     def _show_selected_game_cover(self):
-        if not self._need_update_cover:
+        if not self._need_update_cover or not self._show_covers:
             return
 
         if self._cover_label.isHidden():
