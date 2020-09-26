@@ -364,7 +364,7 @@ roms_path = amiga
 rom_basename_ignore =
 x_floppy_drive_speed = 0
 x_amiga_model = a1200
-run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":20}} --fullscreen --stretch=1 --kickstart_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
+run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":20}} --fullscreen --stretch=1 --zoom=auto --kickstart_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
 run_pattern0_roms_extensions = *.adf
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
