@@ -320,9 +320,6 @@ rom_name_remove1 = \(.*\)
 """
 
 
-app = QApplication(sys.argv)
-
-
 # set False in production, True when developing
 typechecked_class_decorator_enabled = True
 
@@ -1884,6 +1881,8 @@ class MainWindow(QDialog):
 
         return icon
 
+
+app = QApplication(sys.argv)
 
 main_window = MainWindow()
 main_window.show()
