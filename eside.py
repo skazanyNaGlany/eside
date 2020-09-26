@@ -66,6 +66,8 @@ systems_base_path = systems
 roms_base_path = roms
 covers_base_path = roms/covers
 bios_path = systems/bios
+themes_base_path = themes
+theme = dark.qss
 show_non_roms_emulator = 1
 show_non_exe_emulator = 1
 show_emulator_name = 0
@@ -961,7 +963,7 @@ class MainWindow(QDialog):
 
         self._clipboard = QGuiApplication.clipboard()
 
-        self._message_label.setStyleSheet('background-color: white; border: 1px ridge gray; padding: 15px;')
+        self._message_label.setStyleSheet('background-color: transparent; border: 1px ridge gray; padding: 15px;')
         self._message_label.setOpenExternalLinks(True)
         self._message_label.setWordWrap(True)
         self._message_label.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -1003,6 +1005,8 @@ class MainWindow(QDialog):
         self._systems_base_path = self._config_global_section['systems_base_path']
         self._roms_base_path = self._config_global_section['roms_base_path']
         self._covers_base_realpath = Utils.adjust_to_system_path(self._config_global_section['covers_base_path'])
+        self._themes_base_realpath = Utils.adjust_to_system_path(self._config_global_section['themes_base_path'])
+        self._theme = self._config_global_section['theme']
         self._bios_path = self._config_global_section['bios_path']
         self._emulators = self._load_emulators()
 
@@ -1044,6 +1048,24 @@ class MainWindow(QDialog):
 
         if start_maximized:
             self.showMaximized()
+
+        self._load_theme()
+
+
+    def _load_theme(self):
+        if self._theme == 'default':
+            return
+
+        theme_realpath = Utils.adjust_to_system_path(os.path.join(
+            self._themes_base_realpath,
+            self._theme
+        ))
+
+        if not os.path.exists(theme_realpath):
+            print('Theme {theme} not found'.format(theme=self._theme))
+            return
+
+        app.setStyleSheet(open(theme_realpath, 'r').read())
 
 
     def _games_list_right_menu(self):
