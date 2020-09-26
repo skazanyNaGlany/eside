@@ -59,6 +59,11 @@ ANTIMICRO_PROFILE_EXTENSION = '.gamecontroller.amgp'
 ANTIMICRO_EXECUTABLES = ['antimicro.exe', 'antimicro']
 DEFAULT_CONFIG = r"""
 [global]
+# ESide default configuration file. You can create your configuration
+# by using Configuration option, it will create eside.ini file
+# which you can edit to make your own changes.
+#
+# 1 enable, 0 disable
 minimum_window_width = 640
 minimum_window_height = 500
 start_maximized = 0
@@ -68,18 +73,62 @@ covers_base_path = roms/covers
 bios_path = systems/bios
 themes_base_path = themes
 theme = dark.qss
+
+# show emulator even if it has no roms
 show_non_roms_emulator = 1
+
+# show emulator even if it has no executable (not found in systems/ directory)
 show_non_exe_emulator = 1
+
+# show emulator name next to system name (eg. Sony PlayStation2 (PCSX2))
 show_emulator_name = 0
+
+# show count of roms next to system name (eg. Sony PlayStation 2 [60])
 show_emulator_roms_count = 0
+
+# set to 0 to show only "Run selected game" and "Antimicro profile" buttons
 show_other_buttons = 1
-show_covers = 0
+
+# show games covers, you must put your covers to roms/covers/<system> and name it like rom name
+# eg. "roms/covers/amiga/Brian the Lion (1994)(Psygnosis)(AGA)(M4)[cr Comax](Disk 1 of 3).adf.jpeg"
+# png, jpg, jpeg extensions are supported
+show_covers = 1
+
 sort_emulators = 1
 default_emulator = emulator.mame
+
+# some roms has weird names, eg. Smurfs, The (Europe) (En,Fr,De,Es).gb
+# that option will fix it before show in games list
+# The Smurfs (Europe) (En,Fr,De,Es).gb
 fix_game_title = 1
+
+# if your covers are in different size, that option will adjust all covers sizes to
+# the same as first cover is
 covers_same_size = 1
+
+# "antimicro is a graphical program used to map keyboard keys and mouse controls to a gamepad.
+# This program is useful for playing PC games using a gamepad that do not have any form of built-in gamepad support"
+#
+# you can create your own AntiMicro profiles for your gamepad, and put it to systems/antimicro/profiles
+# each profile must be named:
+# <section emulator name>.<your own profile name>.gamecontroller.amgp
+#
+# for example:
+# emulator.project64.xbox_one.p1.gamecontroller.amgp
+#
+# ESide will load all AntiMicro profiles when you switch emulator
+# and you can change the profile by clicking on AntiMicro profile button
+#
+# ESide will start AntiMicro with desired profile just before the game
+# and terminate it when you exit the game
+#
+# I'm using it to play Doom 64 for Nintendo 64 and Final Doom for Sony PlayStation
 antimicro_path = systems/antimicro
 antimicro_profiles_path = systems/antimicro/profiles
+
+# supported emulators and systems
+# you must put desired emulator to systems/ eg. systems/epsxe/
+# and configur it before use in ESide (set controllers, bios)
 
 [emulator.epsxe]
 system_name = Sony PlayStation
