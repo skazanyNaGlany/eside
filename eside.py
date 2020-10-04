@@ -12,6 +12,7 @@ import shutil
 import operator
 import glob
 import fnmatch
+import patoolib
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -72,7 +73,7 @@ roms_base_path = roms
 covers_base_path = roms/covers
 bios_path = systems/bios
 themes_base_path = themes
-theme = dark.qss
+theme = default
 
 # show emulator even if it has no roms
 show_non_roms_emulator = 1
@@ -95,7 +96,7 @@ show_other_buttons = 1
 show_covers = 1
 
 sort_emulators = 1
-default_emulator = emulator.mame
+default_emulator = emulator.fs-uae
 
 # some roms has weird names, eg. Smurfs, The (Europe) (En,Fr,De,Es).gb
 # that option will fix it before show in games list
@@ -364,8 +365,18 @@ roms_path = amiga
 rom_basename_ignore =
 x_floppy_drive_speed = 0
 x_amiga_model = a1200
+x_whdload_path = systems/whdload/WHDLoad
+x_whdload_args = PRELOAD NOVBRMOVE
 run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":20}} --fullscreen --stretch=1 --zoom=auto --kickstart_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
 run_pattern0_roms_extensions = *.adf
+run_pattern1 = "{exe_path}" --amiga-model={x_amiga_model} --fullscreen --stretch=1 --zoom=auto --kickstart_dir="{bios_path}" --chip_memory=8192 --hard-drive-0="{x_whdload_path}" --hard-drive-1="{unpacked_rom_path-first_directory}"
+run_pattern1_roms_extensions = *.lha, *.zip
+run_pattern1_precmd_0 = copy {bios_path}/amiga-os-*.rom {x_whdload_path}/Devs/Kickstarts/
+run_pattern1_precmd_1 = copy {bios_path}/kick*.A* {x_whdload_path}/Devs/Kickstarts/
+run_pattern1_precmd_2 = unpack {rom_path}
+run_pattern1_precmd_3 = delete {x_whdload_path}/S/Startup-Sequence
+run_pattern1_precmd_4 = write {x_whdload_path}/S/Startup-Sequence CD DH1:
+run_pattern1_precmd_5 = write_basename {unpacked_rom_path}/**/*.Slave {x_whdload_path}/S/Startup-Sequence C:WHDLoad SLAVE={write_basename} {x_whdload_args}
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
@@ -442,6 +453,15 @@ class Utils:
 
 
     @staticmethod
+    def adjust_dict_all_to_system_path(dict_keys:dict) -> dict:
+        for ikey in dict_keys:
+            if os.path.exists(dict_keys[ikey]):
+                dict_keys[ikey] = Utils.adjust_to_system_path(dict_keys[ikey])
+
+        return dict_keys
+
+
+    @staticmethod
     def join_paths(*paths) -> str:
         joined = os.path.join(*paths)
 
@@ -453,6 +473,48 @@ class Utils:
         for ifile in files_list:
             if os.path.exists(ifile) and os.path.isfile(ifile):
                 return ifile
+
+        return None
+
+
+    @staticmethod
+    def find_file(pattern:str) -> Optional[str]:
+        exists = glob.glob(pattern, recursive=True)
+
+        if len(exists):
+            return exists[0]
+
+        return None
+
+
+    @staticmethod
+    def copy_files(src_files:list, dst:str, target_is_directory:bool, overwrite:Optional[bool] = False):
+        if target_is_directory:
+            os.makedirs(dst, exist_ok=True)
+
+        for ifile in src_files:
+            with open(ifile, 'rb') as sf:
+                if target_is_directory:
+                    # copy to directory
+                    target_pathname = os.path.join(dst, os.path.basename(ifile))
+
+                    if not overwrite and os.path.exists(target_pathname):
+                        continue
+
+                    with open(target_pathname, 'wb') as df:
+                        shutil.copyfileobj(sf, df)
+                else:
+                    with open(dst, 'wb') as df:
+                        shutil.copyfileobj(sf, df)
+
+
+    @staticmethod
+    def find_first_directory(root_directory:str) -> Optional[str]:
+        for ientry in os.listdir(root_directory):
+            full_pathname = os.path.join(root_directory, ientry)
+
+            if os.path.isdir(full_pathname):
+                return full_pathname
 
         return None
 
@@ -473,6 +535,7 @@ class Emulator:
         roms_path: str,
         raw_roms_path: str,
         run_patterns_roms_extensions: List[List[str]],
+        run_patterns_pre_commands: List[List],
         rom_name_remove: List[str],
         internal_name: str,
         rom_basename_ignore: List[str],
@@ -491,6 +554,7 @@ class Emulator:
         self.raw_roms_path = raw_roms_path
         self.rom_name_remove = rom_name_remove
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
+        self.run_patterns_pre_commands = run_patterns_pre_commands
         self.internal_name = internal_name
         self.rom_basename_ignore = rom_basename_ignore
         self.bios_path = bios_path
@@ -814,6 +878,19 @@ class Emulator:
         return None
 
 
+    def _find_rom_run_pattern_index(self, rom_path:str) -> Optional[int]:
+        rom_path_basename = os.path.basename(rom_path.lower())
+
+        for irun_pattern_roms_extensions in self.run_patterns_roms_extensions:
+            for iextension in irun_pattern_roms_extensions:
+                if fnmatch.fnmatch(rom_path_basename, iextension):
+                    run_pattern_index = self.run_patterns_roms_extensions.index(irun_pattern_roms_extensions)
+
+                    return run_pattern_index
+
+        return None
+
+
     def _find_similar_roms(self, rom_path:str) -> List[str]:
         dirname = os.path.dirname(rom_path)
         basename = os.path.basename(rom_path)
@@ -843,6 +920,11 @@ class Emulator:
 
 
     def _process_extended_pattern(self, pattern:str, rom_path:str, run_pattern_data:dict) -> str:
+        if '{unpacked_rom_path-first_directory}' in pattern and 'unpacked_rom_path' in run_pattern_data:
+            run_pattern_data['unpacked_rom_path-first_directory'] = Utils.find_first_directory(run_pattern_data['unpacked_rom_path'])
+
+            return pattern
+
         if '{{iterate_roms:' not in pattern:
             return pattern
 
@@ -904,17 +986,93 @@ class Emulator:
         return shlex.join(pattern_parts).replace('\'', '')
 
 
+    def _run_pre_commands(self, pre_commands:list, run_pattern_data:dict):
+        if not self.run_patterns_pre_commands:
+            return
+
+        for icmd in pre_commands:
+            if icmd.startswith('copy '):
+                icmd_parts = icmd.split(' ', 3)
+
+                if len(icmd_parts) < 3:
+                    continue
+
+                target_is_directory = icmd_parts[2].endswith('\\') or icmd_parts[2].endswith('/')
+
+                icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
+                icmd_parts[2] = Utils.adjust_to_system_path(icmd_parts[2].format(**run_pattern_data))
+
+                Utils.copy_files(glob.glob(icmd_parts[1]), icmd_parts[2], target_is_directory)
+            elif icmd.startswith('unpack '):
+                icmd_parts = icmd.split(' ', 2)
+
+                if len(icmd_parts) < 2:
+                    continue
+
+                icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
+
+                (root, ext) = os.path.splitext(os.path.basename(icmd_parts[1]))
+
+                unpacked_rom_path = os.path.join(run_pattern_data['roms_path'], root)
+                run_pattern_data['unpacked_rom_path'] = unpacked_rom_path
+
+                if os.path.exists(unpacked_rom_path):
+                    continue
+
+                os.makedirs(unpacked_rom_path, exist_ok=True)
+
+                patoolib.extract_archive(icmd_parts[1], outdir=unpacked_rom_path)
+            elif icmd.startswith('delete '):
+                icmd_parts = icmd.split(' ', 2)
+
+                if len(icmd_parts) < 2:
+                    continue
+
+                icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
+
+                if os.path.exists(icmd_parts[1]):
+                    os.remove(icmd_parts[1])
+            elif icmd.startswith('write '):
+                icmd_parts = icmd.split(' ', 2)
+
+                if len(icmd_parts) < 2:
+                    continue
+
+                icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
+                icmd_parts[2] = icmd_parts[2].format(**run_pattern_data)
+
+                with open(icmd_parts[1], 'a+', newline='') as f:
+                    print(icmd_parts[2], sep='\r', file=f)
+            elif icmd.startswith('write_basename '):
+                icmd_parts = icmd.split(' ', 3)
+
+                if len(icmd_parts) < 3:
+                    continue
+
+                icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
+                icmd_parts[2] = Utils.adjust_to_system_path(icmd_parts[2].format(**run_pattern_data))
+
+                run_pattern_data['write_basename'] = os.path.basename(str(Utils.find_file(icmd_parts[1])))
+
+                icmd_parts[3] = icmd_parts[3].format(**run_pattern_data)
+
+                with open(icmd_parts[2], 'a+', newline='') as f:
+                    print(icmd_parts[3], sep='\r', file=f)
+
+
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
         if not exe_path:
             self._raise_no_exe_exception()
 
-        run_pattern = self._find_rom_run_pattern(rom_path)
+        run_pattern_index = self._find_rom_run_pattern_index(rom_path)
 
-        if not run_pattern:
+        if run_pattern_index is None:
             # should not get here
             self._raise_no_rom_run_pattern_exception(rom_path)
+
+        run_pattern = self.run_patterns[run_pattern_index]
 
         run_pattern_data = {
             'exe_path': exe_path,
@@ -926,12 +1084,17 @@ class Emulator:
         if self.custom_data:
             run_pattern_data.update(self.custom_data)
 
+        if self.run_patterns_pre_commands and run_pattern_index < len(self.run_patterns_pre_commands):
+            self._run_pre_commands(self.run_patterns_pre_commands[run_pattern_index], run_pattern_data)
+
         rom_config = self._find_rom_config(os.path.basename(rom_path))
 
         if rom_config:
             run_pattern_data.update(rom_config)
 
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
+
+        run_pattern_data = Utils.adjust_dict_all_to_system_path(run_pattern_data)
 
         run_command = run_pattern.format(**run_pattern_data)
         print('Running command: ' + run_command)
@@ -1429,26 +1592,37 @@ class MainWindow(QDialog):
     def _prepare_emulator_config(self, emulator_config_section_name:str, emulator_config_section_data:dict):
         run_patterns = []
         run_patterns_roms_extensions = []
+        run_patterns_pre_commands = []
         rom_name_remove = []
         custom_data = {}
 
+        run_pattern_re = r'^run_pattern\d+$'
+        run_pattern_roms_extensions_re = r'^run_pattern\d+_roms_extensions$'
+        run_pattern_precmd_re = r'^run_pattern\d+_precmd_\d+$'
+        rom_name_remove_re = r'^rom_name_remove\d+$'
+        custom_data_re = r'^x_.*$'
+
         for ikey in emulator_config_section_data:
-            if ikey.startswith('run_pattern') and not ikey.endswith('_roms_extensions'):
+            if re.match(run_pattern_re, ikey):
+                run_patterns_pre_commands.append([])
+
                 roms_extensions = emulator_config_section_data[ikey + '_roms_extensions']
 
                 run_patterns.append(emulator_config_section_data[ikey])
                 run_patterns_roms_extensions.append(
                     Utils.string_split_strip(roms_extensions.lower(), ',')
                 )
-            elif ikey.startswith('rom_name_remove'):
+            elif re.match(rom_name_remove_re, ikey):
                 regex_value = emulator_config_section_data[ikey]
 
                 if len(regex_value) >= 2 and regex_value[0] == "'" and regex_value[-1] == "'":
                     regex_value = regex_value[1:-1]
 
                 rom_name_remove.append(regex_value)
-            elif ikey.startswith('x_'):
+            elif re.match(custom_data_re, ikey):
                 custom_data[ikey] = emulator_config_section_data[ikey]
+            elif re.match(run_pattern_precmd_re, ikey):
+                run_patterns_pre_commands[len(run_patterns_pre_commands) - 1].append(emulator_config_section_data[ikey])
 
         exe_paths = []
         raw_exe_paths = Utils.string_split_strip(emulator_config_section_data['exe_paths'], ',')
@@ -1475,6 +1649,7 @@ class MainWindow(QDialog):
             'bios_path': Utils.adjust_to_system_path(self._bios_path),
             'run_patterns': run_patterns,
             'run_patterns_roms_extensions': run_patterns_roms_extensions,
+            'run_patterns_pre_commands': run_patterns_pre_commands,
             'rom_name_remove': rom_name_remove,
             'rom_basename_ignore': Utils.string_split_strip(
                 emulator_config_section_data['rom_basename_ignore'],
