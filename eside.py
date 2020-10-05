@@ -1021,7 +1021,17 @@ class Emulator:
 
                 os.makedirs(unpacked_rom_path, exist_ok=True)
 
-                patoolib.extract_archive(icmd_parts[1], outdir=unpacked_rom_path)
+                try:
+                    patoolib.extract_archive(icmd_parts[1], outdir=unpacked_rom_path, interactive=False)
+                except Exception as x:
+                    x_str = str(x)
+
+                    if ' returned non-zero exit status ' in x_str:
+                        # omit error when archive cannot be unpacked
+                        # but log it to the standard output
+                        print(x_str)
+                    else:
+                        raise x
             elif icmd.startswith('delete '):
                 icmd_parts = icmd.split(' ', 2)
 
