@@ -529,6 +529,7 @@ class Utils:
 class Emulator:
     re_cue_bin_sign = re.compile(r'^FILE\ \"(.*)\"\ BINARY$')
     re_similar_rom_sign = re.compile(r'\(Disk\ \d\ of\ \d\)')
+    re_fixup_game_title_3 = re.compile(r'([A-Z][a-z]*)')
 
 
     def __init__(self,
@@ -837,7 +838,7 @@ class Emulator:
             if name.count(' ') > 0:
                 continue
 
-            parts = [p.strip() for p in re.split(r'([A-Z][a-z]*)', name) if p.strip() != '']
+            parts = [p.strip() for p in Emulator.re_fixup_game_title_3.split(name) if p.strip() != '']
             name = ' '.join(parts)
 
             roms[pathname] = ' '.join(parts)
