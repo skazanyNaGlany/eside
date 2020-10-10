@@ -527,8 +527,9 @@ class Utils:
 
 @typechecked_class_decorator()
 class Emulator:
-    CUE_BIN_RE_SIGN = r'^FILE\ \"(.*)\"\ BINARY$'
-    SIMILAR_ROM_RE_SIGN = r'\(Disk\ \d\ of\ \d\)'
+    re_cue_bin_sign = re.compile(r'^FILE\ \"(.*)\"\ BINARY$')
+    re_similar_rom_sign = re.compile(r'\(Disk\ \d\ of\ \d\)')
+
 
     def __init__(self,
         system_name: str,
@@ -587,7 +588,7 @@ class Emulator:
         for iline in Utils.file_extract_lines(cue_pathname):
             iline = iline.strip()
 
-            match = re.findall(Emulator.CUE_BIN_RE_SIGN, iline)
+            match = Emulator.re_cue_bin_sign.findall(iline)
 
             if len(match) == 1:
                 bin_filename = match[0]
@@ -944,13 +945,13 @@ class Emulator:
 
         (filename, extension) = os.path.splitext(basename)
 
-        match = re.findall(Emulator.SIMILAR_ROM_RE_SIGN, basename)
+        match = Emulator.re_similar_rom_sign.findall(basename)
         len_match = len(match)
 
         if len_match != 1:
             return [rom_path]
 
-        (no_disc_filename, count) = re.subn(Emulator.SIMILAR_ROM_RE_SIGN, '', basename, 1)
+        (no_disc_filename, count) = Emulator.re_similar_rom_sign.subn('', basename, 1)
         (clean_filename, extension) = os.path.splitext(no_disc_filename)
 
         files = glob.glob(os.path.join(dirname, '*' + extension))
@@ -959,7 +960,7 @@ class Emulator:
         for ifile in files:
             ifile_basename = os.path.basename(ifile)
 
-            if ifile_basename.startswith(clean_filename) and len(re.findall(Emulator.SIMILAR_ROM_RE_SIGN, ifile_basename)) == 1 and ifile_basename.endswith(extension):
+            if ifile_basename.startswith(clean_filename) and len(Emulator.re_similar_rom_sign.findall(ifile_basename)) == 1 and ifile_basename.endswith(extension):
                 if ifile not in similar:
                     similar.append(ifile)
 
@@ -1181,6 +1182,12 @@ class Emulator:
 class MainWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        self._re_run_pattern = re.compile(r'^run_pattern\d+$')
+        self._re_run_pattern_roms_extensions = re.compile(r'^run_pattern\d+_roms_extensions$')
+        self._re_run_pattern_precmd = re.compile(r'^run_pattern\d+_precmd_\d+$')
+        self._re_rom_name_remove = re.compile(r'^rom_name_remove\d+$')
+        self._re_custom_data = re.compile(r'^x_.*$')
 
         self._config = self._parse_config()
         self._config_global_section = dict(self._config['global'].items())
@@ -1667,14 +1674,8 @@ class MainWindow(QDialog):
         rom_name_remove = []
         custom_data = {}
 
-        run_pattern_re = r'^run_pattern\d+$'
-        run_pattern_roms_extensions_re = r'^run_pattern\d+_roms_extensions$'
-        run_pattern_precmd_re = r'^run_pattern\d+_precmd_\d+$'
-        rom_name_remove_re = r'^rom_name_remove\d+$'
-        custom_data_re = r'^x_.*$'
-
         for ikey in emulator_config_section_data:
-            if re.match(run_pattern_re, ikey):
+            if self._re_run_pattern.match(ikey):
                 run_patterns_pre_commands.append([])
 
                 roms_extensions = emulator_config_section_data[ikey + '_roms_extensions']
@@ -1683,16 +1684,16 @@ class MainWindow(QDialog):
                 run_patterns_roms_extensions.append(
                     Utils.string_split_strip(roms_extensions.lower(), ',')
                 )
-            elif re.match(rom_name_remove_re, ikey):
+            elif self._re_rom_name_remove.match(ikey):
                 regex_value = emulator_config_section_data[ikey]
 
                 if len(regex_value) >= 2 and regex_value[0] == "'" and regex_value[-1] == "'":
                     regex_value = regex_value[1:-1]
 
                 rom_name_remove.append(regex_value)
-            elif re.match(custom_data_re, ikey):
+            elif self._re_custom_data.match(ikey):
                 custom_data[ikey] = emulator_config_section_data[ikey]
-            elif re.match(run_pattern_precmd_re, ikey):
+            elif self._re_run_pattern_precmd.match(ikey):
                 run_patterns_pre_commands[len(run_patterns_pre_commands) - 1].append(emulator_config_section_data[ikey])
 
         exe_paths = []
