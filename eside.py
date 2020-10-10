@@ -549,7 +549,10 @@ class Emulator:
         rom_basename_ignore: List[str],
         # globals:
         bios_path: str,
-        custom_data: dict
+        custom_data: dict,
+        fix_game_title: bool,
+        fix_game_title2: bool,
+        fix_game_title3: bool
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -567,6 +570,9 @@ class Emulator:
         self.rom_basename_ignore = rom_basename_ignore
         self.bios_path = bios_path
         self.custom_data = custom_data
+        self.fix_game_title = fix_game_title
+        self.fix_game_title2 = fix_game_title2
+        self.fix_game_title3 = fix_game_title3
         self._cached_roms = None
         self._cached_exe_pathname = None
         self._cached_gui_exe_pathname = None
@@ -879,12 +885,7 @@ class Emulator:
                 roms[ipathname] = iname
 
 
-    def get_emulator_roms(self,
-                          cached:bool = True,
-                          fixup_titles:bool = False,
-                          fixup_titles2:bool = False,
-                          fixup_titles3:bool = False
-    ) -> Optional[dict]:
+    def get_emulator_roms(self, cached:bool = True) -> Optional[dict]:
         if cached and self._cached_roms is not None:
             return self._cached_roms
 
@@ -898,13 +899,13 @@ class Emulator:
             if new_roms:
                 self._add_new_roms(roms, new_roms)
 
-        if fixup_titles:
+        if self.fix_game_title:
             roms = self._fixup_game_titles(roms)
 
-        if fixup_titles2:
+        if self.fix_game_title2:
             roms = self._fixup_game_titles2(roms)
 
-        if fixup_titles3:
+        if self.fix_game_title3:
             roms = self._fixup_game_titles3(roms)
 
         roms = self._count_rom_titles(roms)
@@ -1197,6 +1198,9 @@ class MainWindow(QDialog):
         minimum_window_height = int(self._config_global_section['minimum_window_height'])
         show_other_buttons = self._config_global_section['show_other_buttons'] == '1'
         self._show_covers = self._config_global_section['show_covers'] == '1'
+        self._fix_game_title = self._config_global_section['fix_game_title'] == '1'
+        self._fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
+        self._fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
 
         self._antimicro_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_path'])
         self._antimicro_profiles_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_profiles_path'])
@@ -1440,10 +1444,6 @@ class MainWindow(QDialog):
 
 
     def _show_warning_message(self):
-        fix_game_title = self._config_global_section['fix_game_title'] == '1'
-        fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
-        fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
-
         current_index = self._emu_selector.currentIndex()
 
         if current_index <= -1:
@@ -1452,11 +1452,7 @@ class MainWindow(QDialog):
         emulator = self._emulators[current_index]
 
         exe_pathname = emulator.get_emulator_executable()
-        roms = emulator.get_emulator_roms(
-            fixup_titles=fix_game_title,
-            fixup_titles2=fix_game_title2,
-            fixup_titles3=fix_game_title3
-        )
+        roms = emulator.get_emulator_roms()
 
         if exe_pathname and roms:
             self._show_message('')
@@ -1538,9 +1534,6 @@ class MainWindow(QDialog):
     def _format_emulator_name(self, iemulator:Emulator) -> str:
         show_emulator_name = self._config_global_section['show_emulator_name'] == '1'
         show_emulator_roms_count = self._config_global_section['show_emulator_roms_count'] == '1'
-        fix_game_title = self._config_global_section['fix_game_title'] == '1'
-        fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
-        fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
 
         if show_emulator_name or show_emulator_roms_count:
             formatted_name = '{system_name:<50}'.format(system_name=iemulator.system_name)
@@ -1549,11 +1542,7 @@ class MainWindow(QDialog):
                 formatted_name += '{emulator_name:<10}'.format(emulator_name=iemulator.emulator_name)
 
             if show_emulator_roms_count:
-                formatted_name += '{roms_count}'.format(roms_count = len(iemulator.get_emulator_roms(
-                    fixup_titles=fix_game_title,
-                    fixup_titles2=fix_game_title2,
-                    fixup_titles3=fix_game_title3
-                )))
+                formatted_name += '{roms_count}'.format(roms_count = len(iemulator.get_emulator_roms()))
         else:
             formatted_name = '{system_name}'.format(system_name=iemulator.system_name)
 
@@ -1728,7 +1717,10 @@ class MainWindow(QDialog):
                 emulator_config_section_data['rom_basename_ignore'],
                 ','
             ),
-            'custom_data': custom_data
+            'custom_data': custom_data,
+            'fix_game_title': self._fix_game_title,
+            'fix_game_title2': self._fix_game_title2,
+            'fix_game_title3': self._fix_game_title3
         }
 
 
@@ -1757,9 +1749,6 @@ class MainWindow(QDialog):
         show_non_roms_emulator = self._config_global_section['show_non_roms_emulator'] == '1'
         show_non_exe_emulator = self._config_global_section['show_non_exe_emulator'] == '1'
         sort_emulators = self._config_global_section['sort_emulators'] == '1'
-        fix_game_title = self._config_global_section['fix_game_title'] == '1'
-        fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
-        fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
 
         emulators = []
 
@@ -1779,11 +1768,7 @@ class MainWindow(QDialog):
 
             if not show_non_roms_emulator:
                 # check if emulator have roms
-                if not iemulator.get_emulator_roms(
-                    fixup_titles=fix_game_title,
-                    fixup_titles2=fix_game_title2,
-                    fixup_titles3=fix_game_title3
-                ):
+                if not iemulator.get_emulator_roms():
                     continue
 
             emulators.append(iemulator)
@@ -1832,10 +1817,6 @@ class MainWindow(QDialog):
 
 
     def _show_current_emulator_roms(self, first_run:bool = False, cached:bool = True):
-        fix_game_title = self._config_global_section['fix_game_title'] == '1'
-        fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
-        fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
-
         try:
             self._games_list.blockSignals(True)
             self._games_list.clear()
@@ -1845,11 +1826,7 @@ class MainWindow(QDialog):
             if not emulator:
                 return
 
-            self._roms = self._get_current_emulator().get_emulator_roms(cached,
-                fixup_titles=fix_game_title,
-                fixup_titles2=fix_game_title2,
-                fixup_titles3=fix_game_title3
-            )
+            self._roms = self._get_current_emulator().get_emulator_roms(cached)
 
             if not self._roms:
                 return
