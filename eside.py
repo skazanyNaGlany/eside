@@ -485,7 +485,10 @@ class Utils:
 
     @staticmethod
     def find_file(pattern:str) -> Optional[str]:
-        exists = glob.glob(pattern, recursive=True)
+        def either(c):
+            return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+
+        exists = glob.glob(''.join(map(either, pattern)), recursive=True)
 
         if len(exists):
             return exists[0]
