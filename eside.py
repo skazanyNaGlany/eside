@@ -382,7 +382,7 @@ run_pattern1_precmd_1 = copy {bios_path}/kick*.A* {x_whdload_path}/Devs/Kickstar
 run_pattern1_precmd_2 = unpack {rom_path}
 run_pattern1_precmd_3 = delete {x_whdload_path}/S/Startup-Sequence
 run_pattern1_precmd_4 = write {x_whdload_path}/S/Startup-Sequence CD DH1:
-run_pattern1_precmd_5 = write_basename {unpacked_rom_path}/**/*.Slave {x_whdload_path}/S/Startup-Sequence C:WHDLoad SLAVE={write_basename} {x_whdload_args}
+run_pattern1_precmd_5 = write_basename {unpacked_rom_path}/*.Slave {x_whdload_path}/S/Startup-Sequence C:WHDLoad SLAVE={write_basename} {x_whdload_args}
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
 """
@@ -484,14 +484,27 @@ class Utils:
 
 
     @staticmethod
-    def find_file(pattern:str) -> Optional[str]:
-        def either(c):
-            return '[%s%s]' % (c.lower(), c.upper()) if c.isalpha() else c
+    def find_file(directory:str, pattern:str, recursive:bool = False, case_sensitive:bool = True, basename:bool = False) -> Optional[str]:
+        pathname = None
+        re_pattern = fnmatch.translate(pattern)
 
-        exists = glob.glob(''.join(map(either, pattern)), recursive=True)
+        for ifile_pathname in glob.glob(Utils.adjust_to_system_path(os.path.join(directory, '**/*.*')), recursive=recursive):
+            file_basename = os.path.basename(ifile_pathname)
 
-        if len(exists):
-            return exists[0]
+            if case_sensitive:
+                if re.match(re_pattern, file_basename):
+                    pathname = ifile_pathname
+                    break
+            else:
+                if re.match(re_pattern, file_basename, re.IGNORECASE):
+                    pathname = ifile_pathname
+                    break
+
+        if pathname:
+            if basename:
+                return os.path.basename(pathname)
+            else:
+                return pathname
 
         return None
 
@@ -1117,7 +1130,13 @@ class Emulator:
                 icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
                 icmd_parts[2] = Utils.adjust_to_system_path(icmd_parts[2].format(**run_pattern_data))
 
-                run_pattern_data['write_basename'] = os.path.basename(str(Utils.find_file(icmd_parts[1])))
+                run_pattern_data['write_basename'] = Utils.find_file(
+                    os.path.dirname(icmd_parts[1]),
+                    os.path.basename(icmd_parts[1]),
+                    True,
+                    False,
+                    True
+                )
 
                 icmd_parts[3] = icmd_parts[3].format(**run_pattern_data)
 
