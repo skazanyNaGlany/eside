@@ -47,8 +47,8 @@ if __name__ != '__main__':
     print('Do not import this file, just run.')
     exit(1)
 
-if sys.version_info[0] < 3 or sys.version_info[1] < 5:
-    print('Python 3.5+ is required.')
+if sys.version_info[0] < 3 or sys.version_info[1] < 8:
+    print('Python 3.8+ is required.')
     exit(2)
 
 
