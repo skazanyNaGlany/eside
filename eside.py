@@ -1104,6 +1104,8 @@ class Emulator:
                 icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
                 icmd_parts[2] = icmd_parts[2].format(**run_pattern_data)
 
+                os.makedirs(os.path.dirname(icmd_parts[1]), exist_ok=True)
+
                 with open(icmd_parts[1], 'a+', newline='') as f:
                     print(icmd_parts[2], sep='\r', file=f)
             elif icmd.startswith('write_basename '):
