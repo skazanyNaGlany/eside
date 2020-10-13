@@ -385,6 +385,19 @@ run_pattern1_precmd_4 = write {x_whdload_path}/S/Startup-Sequence CD DH1:
 run_pattern1_precmd_5 = write_basename {unpacked_rom_path}/*.Slave {x_whdload_path}/S/Startup-Sequence C:WHDLoad SLAVE={write_basename} {x_whdload_args}
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.stella]
+system_name = Atari 2600
+emulator_name = Stella
+emulator_url = https://stella-emu.github.io/
+exe_paths = stella/Stella.exe
+gui_paths =
+roms_path = atari2600
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" -fullscreen 1 -tia.fs_stretch 1 "{rom_path}"
+run_pattern0_roms_extensions = *.a26
+rom_name_remove0 = \[[^\]]*\]
+rom_name_remove1 = \(.*\)
 """
 
 
