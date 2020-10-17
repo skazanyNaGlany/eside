@@ -398,6 +398,17 @@ run_pattern0 = "{exe_path}" -fullscreen 1 -tia.fs_stretch 1 "{rom_path}"
 run_pattern0_roms_extensions = *.a26
 rom_name_remove0 = \[[^\]]*\]
 rom_name_remove1 = \(.*\)
+
+[emulator.rpcs3]
+system_name = Sony PlayStation 3
+emulator_name = RPCS3
+emulator_url = https://rpcs3.net/
+exe_paths = rpcs3/rpcs3.exe, rpcs3/rpcs3
+gui_paths =
+roms_path = ps3
+rom_basename_ignore =
+run_pattern0 = "{exe_path}" --no-gui "{rom_path}"
+run_pattern0_roms_extensions = EBOOT.BIN
 """
 
 
