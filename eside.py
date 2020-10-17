@@ -769,11 +769,19 @@ class Emulator:
         if not self._roms_config:
             return None
 
+        rom_path = rom_path.lower()
+        rom_basename = os.path.basename(rom_path)
+
+        if rom_basename in self._roms_config.sections():
+            return dict(self._roms_config[rom_basename])
+
         if rom_path in self._roms_config.sections():
             return dict(self._roms_config[rom_path])
 
         for ikey in self._roms_config.sections():
-            if fnmatch.fnmatch(rom_path, ikey):
+            lower_ikey = ikey.lower()
+
+            if fnmatch.fnmatch(rom_path, lower_ikey) or fnmatch.fnmatch(rom_basename, lower_ikey):
                 return dict(self._roms_config[ikey])
 
         return None
@@ -807,7 +815,7 @@ class Emulator:
                 if not fnmatch.fnmatch(lower_filename, iextension):
                     continue
 
-                rom_config = self._find_rom_config(ifile.name)
+                rom_config = self._find_rom_config(ifile_pathname)
 
                 if rom_config and 'hide' in rom_config and rom_config['hide'] == '1':
                     continue
@@ -1198,7 +1206,7 @@ class Emulator:
         if self.run_patterns_pre_commands and run_pattern_index < len(self.run_patterns_pre_commands):
             self._run_pre_commands(self.run_patterns_pre_commands[run_pattern_index], run_pattern_data)
 
-        rom_config = self._find_rom_config(os.path.basename(rom_path))
+        rom_config = self._find_rom_config(rom_path)
 
         if rom_config:
             run_pattern_data.update(rom_config)
