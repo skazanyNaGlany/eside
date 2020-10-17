@@ -884,6 +884,9 @@ class Emulator:
             if name.count(' ') > 0:
                 continue
 
+            if name.islower() or name.isupper():
+                continue
+
             parts = [p.strip() for p in Emulator.re_fixup_game_title_3.split(name) if p.strip() != '']
             name = ' '.join(parts)
 
