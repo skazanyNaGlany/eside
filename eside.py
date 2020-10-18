@@ -34,10 +34,11 @@ from PySide2.QtWidgets import (                 # pylint: disable=no-name-in-mod
     QListWidgetItem,
     QSizePolicy,
     QMenu,
-    QAction
+    QAction,
+    QWidget
 )
 from PySide2 import QtCore, QtGui
-from PySide2.QtCore import Qt, QTimer                           # pylint: disable=no-name-in-module
+from PySide2.QtCore import Qt, QTimer, QObject                  # pylint: disable=no-name-in-module
 from PySide2.QtGui import QKeyEvent, QFont, QGuiApplication     # pylint: disable=no-name-in-module
 
 from configparser import ConfigParser
@@ -1384,12 +1385,27 @@ class MainWindow(QDialog):
         self._antimicro_timer.timeout.connect(self._antimicro_timer_timeout)
         self._antimicro_timer.start(500)
 
+        self._emulator_process_timer = QTimer(self)
+        self._emulator_process_timer.timeout.connect(self._emulator_process_timer_timeout)
+        self._emulator_process_timer.start(500)
+
         start_maximized = self._config_global_section['start_maximized'] == '1'
 
         if start_maximized:
             self.showMaximized()
 
         self._load_theme()
+
+
+    def _enable_children(self, widget:QObject, enable:Optional[bool] = True):
+        if hasattr(widget, '__enabled'):
+            if getattr(widget, '__enabled') == enable:
+                return
+
+        setattr(widget, '__enabled', enable)
+
+        for ichild in widget.findChildren(QWidget):
+            ichild.setEnabled(enable)
 
 
     def _load_theme(self):
@@ -1443,16 +1459,17 @@ class MainWindow(QDialog):
 
             return
 
-        if self._emulator_process.poll() is None:
-            # still running
-            return
 
-        self._emulator_process = None
+    def _emulator_process_timer_timeout(self):
+        running = self._emulator_process != None and self._emulator_process.poll() is None
 
-        # emulator process terminated
-        # terminate antimicro
-        self._antimicro_process.terminate()
-        self._antimicro_process = None
+        self._enable_children(self, not running)
+
+        if not running:
+            if self._emulator_process != None:
+                self._games_list.setFocus()
+
+            self._emulator_process = None
 
 
     def eventFilter(self, source, event):
