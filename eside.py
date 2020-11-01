@@ -381,9 +381,9 @@ x_floppy_drive_speed = 0
 x_amiga_model = a1200
 x_whdload_path = systems/whdload/WHDLoad
 x_whdload_args = PRELOAD NOVBRMOVE
-run_pattern0 = ["{exe_path}", "--amiga-model={x_amiga_model}", "{{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}}", "{{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:20}}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--floppy_drive_speed={x_floppy_drive_speed}"]
+run_pattern0 = ["{exe_path}", "--amiga-model={x_amiga_model}", "{{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}}", "{{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:20}}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--floppy_drive_speed={x_floppy_drive_speed}", "--state_dir={rom_save_states_dir}"]
 run_pattern0_roms_extensions = *.adf
-run_pattern1 = ["{exe_path}", "--amiga-model={x_amiga_model}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--chip_memory=8192", "--hard-drive-0={x_whdload_path}", "--hard-drive-1={unpacked_rom_path-first_directory}"]
+run_pattern1 = ["{exe_path}", "--amiga-model={x_amiga_model}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--chip_memory=8192", "--hard-drive-0={x_whdload_path}", "--hard-drive-1={unpacked_rom_path-first_directory}", "--state_dir={rom_save_states_dir}"]
 run_pattern1_roms_extensions = *.lha, *.zip
 run_pattern1_precmd_0 = copy {bios_path}/amiga-os-*.rom {x_whdload_path}/Devs/Kickstarts/
 run_pattern1_precmd_1 = copy {bios_path}/kick*.A* {x_whdload_path}/Devs/Kickstarts/
@@ -1190,6 +1190,20 @@ class Emulator:
                     print(icmd_parts[3], sep='\r', file=f)
 
 
+    def _add_custom_paths(self, run_pattern_data:dict, run_pattern:str) -> dict:
+        if '{rom_save_states_dir}' in run_pattern:
+            run_pattern_data['rom_save_states_dir'] = os.path.join(
+                self.roms_base_path,
+                'save_states',
+                self.internal_name,
+                os.path.basename(run_pattern_data['rom_path'])
+            )
+
+            os.makedirs(run_pattern_data['rom_save_states_dir'], exist_ok=True)
+
+        return run_pattern_data
+
+
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
@@ -1208,7 +1222,8 @@ class Emulator:
             'exe_path': exe_path,
             'rom_path': rom_path,
             'roms_path': self.get_full_roms_path(),
-            'bios_path': self.bios_path
+            'bios_path': self.bios_path,
+            'roms_base_path': Utils.adjust_to_system_path(self.roms_base_path)
         }
 
         if self.custom_data:
@@ -1224,6 +1239,7 @@ class Emulator:
 
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
         run_pattern_data = Utils.adjust_dict_all_to_system_path(run_pattern_data)
+        run_pattern_data = self._add_custom_paths(run_pattern_data, run_pattern)
         run_command_list = json.loads(run_pattern)
 
         for ipattern_index, ipattern_item in enumerate(run_command_list.copy()):
@@ -1792,6 +1808,7 @@ class MainWindow(QDialog):
             'gui_paths': gui_paths,
             'raw_exe_paths': raw_exe_paths,
             'roms_path': Utils.join_paths(self._roms_base_path, emulator_config_section_data['roms_path']),
+            'roms_base_path': Utils.adjust_to_system_path(self._roms_base_path),
             'raw_roms_path': emulator_config_section_data['roms_path'],
             'bios_path': Utils.adjust_to_system_path(self._bios_path),
             'run_patterns': run_patterns,
