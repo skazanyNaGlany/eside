@@ -1122,7 +1122,7 @@ class Emulator:
                 (rom_filename, ext) = os.path.splitext(os.path.basename(icmd_parts[1]))
 
                 if self.unpack_to_tmp:
-                    unpacked_rom_path = os.path.join(tempfile.gettempdir(), self.raw_roms_path, rom_filename)
+                    unpacked_rom_path = os.path.join(tempfile.gettempdir(), self.internal_name, rom_filename)
                 else:
                     unpacked_rom_path = os.path.join(run_pattern_data['roms_path'], rom_filename)
 
