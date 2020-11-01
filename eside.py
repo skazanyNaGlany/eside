@@ -589,6 +589,7 @@ class Emulator:
         raw_exe_paths: List[str],
         run_patterns: List[str],
         roms_path: str,
+        roms_base_path: str,
         raw_roms_path: str,
         run_patterns_roms_extensions: List[List[str]],
         run_patterns_pre_commands: List[List],
@@ -611,6 +612,7 @@ class Emulator:
         self.raw_exe_paths = raw_exe_paths
         self.run_patterns = run_patterns
         self.roms_path = roms_path
+        self.roms_base_path = roms_base_path
         self.raw_roms_path = raw_roms_path
         self.rom_name_remove = rom_name_remove
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
