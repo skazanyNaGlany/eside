@@ -6,13 +6,13 @@ import re
 import subprocess
 import base64
 import traceback
-import shlex
 import pathlib
 import shutil
 import operator
 import glob
 import fnmatch
 import patoolib
+import json
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -48,8 +48,8 @@ if __name__ != '__main__':
     print('Do not import this file, just run.')
     exit(1)
 
-if sys.version_info[0] < 3 or sys.version_info[1] < 8:
-    print('Python 3.8+ is required.')
+if sys.version_info[0] < 3 or sys.version_info[1] < 6:
+    print('Python 3.6+ is required.')
     exit(2)
 
 
@@ -374,9 +374,9 @@ x_floppy_drive_speed = 0
 x_amiga_model = a1200
 x_whdload_path = systems/whdload/WHDLoad
 x_whdload_args = PRELOAD NOVBRMOVE NOWRITECACHE
-run_pattern0 = \"{exe_path}\" --amiga-model={x_amiga_model} {{iterate_roms:--floppy-drive-{rom_index}=\"{rom_path}\":4}} {{iterate_all_roms:--floppy-image-{rom_index}=\"{rom_path}\":20}} --fullscreen --stretch=1 --zoom=auto --smoothing=1 --kickstarts_dir=\"{bios_path}\" --floppy_drive_speed={x_floppy_drive_speed}
+run_pattern0 = ["{exe_path}", "--amiga-model={x_amiga_model}", "{{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}}", "{{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:20}}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--floppy_drive_speed={x_floppy_drive_speed}"]
 run_pattern0_roms_extensions = *.adf
-run_pattern1 = "{exe_path}" --amiga-model={x_amiga_model} --fullscreen --stretch=1 --zoom=auto --smoothing=1 --kickstarts_dir="{bios_path}" --chip_memory=8192 --hard-drive-0="{x_whdload_path}" --hard-drive-1="{unpacked_rom_path-first_directory}"
+run_pattern1 = ["{exe_path}", "--amiga-model={x_amiga_model}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--chip_memory=8192", "--hard-drive-0={x_whdload_path}", "--hard-drive-1={unpacked_rom_path-first_directory}"]
 run_pattern1_roms_extensions = *.lha, *.zip
 run_pattern1_precmd_0 = copy {bios_path}/amiga-os-*.rom {x_whdload_path}/Devs/Kickstarts/
 run_pattern1_precmd_1 = copy {bios_path}/kick*.A* {x_whdload_path}/Devs/Kickstarts/
@@ -1030,50 +1030,49 @@ class Emulator:
         if '{{iterate_roms:' not in pattern:
             return pattern
 
-        pattern_parts = shlex.split(pattern)
+        pattern_parts = json.loads(pattern)
         similar_roms = self._find_similar_roms(rom_path)
+        result_list = []
 
         for index, ipattern_part in enumerate(pattern_parts):
             if not ipattern_part or not ipattern_part.endswith('}}'):
+                result_list.append(ipattern_part)
                 continue
 
             command_parts = ipattern_part[2:-2].split(':', 3)
 
             if len(command_parts) != 3:
+                result_list.append(ipattern_part)
                 continue
 
             similar_roms_copy = similar_roms.copy()
 
             if command_parts[0] == 'iterate_roms':
-                result_str = ''
-
                 command_data_unfilled = command_parts[1]
                 command_max = int(command_parts[2])
 
                 if command_max < 1:
+                    result_list.append(ipattern_part)
                     continue
 
                 # first rom is always at 0 index
                 if len(similar_roms_copy) > command_max:
                     similar_roms_copy = similar_roms_copy[0:command_max]
 
-                result_str += command_data_unfilled.format(rom_index=0, rom_path=rom_path) + ' '
+                result_list.append(command_data_unfilled.format(rom_index=0, rom_path=rom_path))
 
                 # avoid error when similar_roms_copy is empty (command_max=1)
                 if rom_path in similar_roms_copy:
                     similar_roms_copy.remove(rom_path)
 
                 for irom_path_index, irom_path in enumerate(similar_roms_copy):
-                    result_str += command_data_unfilled.format(rom_index=irom_path_index + 1, rom_path=irom_path) + ' '
-
-                pattern_parts[index] = result_str
+                    result_list.append(command_data_unfilled.format(rom_index=irom_path_index + 1, rom_path=irom_path))
             elif command_parts[0] == 'iterate_all_roms':
-                result_str = ''
-
                 command_data_unfilled = command_parts[1]
                 command_max = int(command_parts[2])
 
                 if command_max < 1:
+                    result_list.append(ipattern_part)
                     continue
 
                 # first rom is always at 0 index
@@ -1081,11 +1080,9 @@ class Emulator:
                     similar_roms_copy = similar_roms_copy[0:command_max]
 
                 for irom_path_index, irom_path in enumerate(similar_roms_copy):
-                    result_str += command_data_unfilled.format(rom_index=irom_path_index, rom_path=irom_path) + ' '
+                    result_list.append(command_data_unfilled.format(rom_index=irom_path_index, rom_path=irom_path))
 
-                pattern_parts[index] = result_str
-
-        return shlex.join(pattern_parts).replace('\'', '')
+        return json.dumps(result_list)
 
 
     def _run_pre_commands(self, pre_commands:list, run_pattern_data:dict):
@@ -1213,15 +1210,16 @@ class Emulator:
             run_pattern_data.update(rom_config)
 
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
-
         run_pattern_data = Utils.adjust_dict_all_to_system_path(run_pattern_data)
+        run_command_list = json.loads(run_pattern)
 
-        run_command = run_pattern.format(**run_pattern_data)
-        print('Running command: ' + run_command)
+        for ipattern_index, ipattern_item in enumerate(run_command_list.copy()):
+            run_command_list[ipattern_index] = ipattern_item.format(**run_pattern_data)
 
-        args = shlex.split(run_command)
+        run_command_str = ' '.join(run_command_list)
+        print('Running command: ' + run_command_str)
 
-        self._running_rom = subprocess.Popen(args, cwd=os.path.dirname(exe_path))
+        self._running_rom = subprocess.Popen(run_command_list, cwd=os.path.dirname(exe_path))
 
         return self._running_rom
 
@@ -1232,10 +1230,7 @@ class Emulator:
         if not exe_path:
             self._raise_no_exe_exception()
 
-        run_command = '"{exe_path}"'.format(exe_path=exe_path)
-        args = shlex.split(run_command)
-
-        self._running_rom = subprocess.Popen(args, cwd=os.path.dirname(exe_path))
+        self._running_rom = subprocess.Popen([exe_path], cwd=os.path.dirname(exe_path))
 
         return self._running_rom
 
@@ -2226,7 +2221,7 @@ class MainWindow(QDialog):
             current_emulator = self._get_current_emulator()
 
             if current_emulator:
-                current_emulator.run_gui()
+                self._emulator_process = current_emulator.run_gui()
         except Exception as x:
             self._log_exception(x)
 
