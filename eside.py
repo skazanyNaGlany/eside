@@ -380,7 +380,7 @@ rom_basename_ignore =
 x_floppy_drive_speed = 0
 x_amiga_model = a1200
 x_whdload_path = systems/whdload/WHDLoad
-x_whdload_args = PRELOAD NOVBRMOVE NOWRITECACHE
+x_whdload_args = PRELOAD NOVBRMOVE
 run_pattern0 = ["{exe_path}", "--amiga-model={x_amiga_model}", "{{iterate_roms:--floppy-drive-{rom_index}={rom_path}:4}}", "{{iterate_all_roms:--floppy-image-{rom_index}={rom_path}:20}}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--floppy_drive_speed={x_floppy_drive_speed}"]
 run_pattern0_roms_extensions = *.adf
 run_pattern1 = ["{exe_path}", "--amiga-model={x_amiga_model}", "--fullscreen", "--stretch=1", "--zoom=auto", "--smoothing=1", "--kickstarts_dir={bios_path}", "--chip_memory=8192", "--hard-drive-0={x_whdload_path}", "--hard-drive-1={unpacked_rom_path-first_directory}"]
