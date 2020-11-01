@@ -22,3 +22,5 @@ coin 1 = select
 
 
 Running command: "/usr/bin/fs-uae" --amiga-model=a1200 --floppy-drive-0="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-drive-1="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-drive-2="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf"  --floppy-image-0="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 1 of 3).adf" --floppy-image-1="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 2 of 3).adf" --floppy-image-2="/mnt/hgfs/D/games/roms/amiga/Lazarus (1995)(Infinite Dreams)(Pl)[h Tim Soft](Disk 3 of 3).adf"  --fullscreen --stretch=1 --zoom=auto --smoothing=1 --kickstarts_dir="/mnt/hgfs/D/games/systems/bios" --floppy_drive_speed=0
+
+unpack_to_tmp

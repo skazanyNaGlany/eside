@@ -13,6 +13,7 @@ import glob
 import fnmatch
 import patoolib
 import json
+import tempfile
 
 import warnings
 warnings.simplefilter('ignore', UserWarning)
@@ -76,6 +77,11 @@ covers_base_path = roms/covers
 bios_path = systems/bios
 themes_base_path = themes
 theme = default
+
+# if rom needs to be unpacked (like Amiga LHA)
+# unpack it to temporary directory
+# instead to roms/<system> directory
+unpack_to_tmp = 1
 
 # show emulator even if it has no roms
 show_non_roms_emulator = 1
@@ -594,7 +600,8 @@ class Emulator:
         custom_data: dict,
         fix_game_title: bool,
         fix_game_title2: bool,
-        fix_game_title3: bool
+        fix_game_title3: bool,
+        unpack_to_tmp: bool
     ):
         self.system_name = system_name
         self.emulator_name = emulator_name
@@ -615,6 +622,7 @@ class Emulator:
         self.fix_game_title = fix_game_title
         self.fix_game_title2 = fix_game_title2
         self.fix_game_title3 = fix_game_title3
+        self.unpack_to_tmp = unpack_to_tmp
         self._cached_roms = None
         self._cached_exe_pathname = None
         self._cached_gui_exe_pathname = None
@@ -1111,9 +1119,13 @@ class Emulator:
 
                 icmd_parts[1] = Utils.adjust_to_system_path(icmd_parts[1].format(**run_pattern_data))
 
-                (root, ext) = os.path.splitext(os.path.basename(icmd_parts[1]))
+                (rom_filename, ext) = os.path.splitext(os.path.basename(icmd_parts[1]))
 
-                unpacked_rom_path = os.path.join(run_pattern_data['roms_path'], root)
+                if self.unpack_to_tmp:
+                    unpacked_rom_path = os.path.join(tempfile.gettempdir(), self.raw_roms_path, rom_filename)
+                else:
+                    unpacked_rom_path = os.path.join(run_pattern_data['roms_path'], rom_filename)
+
                 run_pattern_data['unpacked_rom_path'] = unpacked_rom_path
 
                 if os.path.exists(unpacked_rom_path):
@@ -1257,6 +1269,7 @@ class MainWindow(QDialog):
         self._fix_game_title = self._config_global_section['fix_game_title'] == '1'
         self._fix_game_title2 = self._config_global_section['fix_game_title2'] == '1'
         self._fix_game_title3 = self._config_global_section['fix_game_title3'] == '1'
+        self._unpack_to_tmp = self._config_global_section['unpack_to_tmp'] == '1'
 
         self._antimicro_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_path'])
         self._antimicro_profiles_path = Utils.adjust_to_system_path(self._config_global_section['antimicro_profiles_path'])
@@ -1792,7 +1805,8 @@ class MainWindow(QDialog):
             'custom_data': custom_data,
             'fix_game_title': self._fix_game_title,
             'fix_game_title2': self._fix_game_title2,
-            'fix_game_title3': self._fix_game_title3
+            'fix_game_title3': self._fix_game_title3,
+            'unpack_to_tmp': self._unpack_to_tmp
         }
 
 
