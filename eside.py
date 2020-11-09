@@ -589,7 +589,6 @@ class Emulator:
         raw_exe_paths: List[str],
         run_patterns: List[str],
         roms_path: str,
-        roms_base_path: str,
         raw_roms_path: str,
         run_patterns_roms_extensions: List[List[str]],
         run_patterns_pre_commands: List[List],
@@ -612,7 +611,6 @@ class Emulator:
         self.raw_exe_paths = raw_exe_paths
         self.run_patterns = run_patterns
         self.roms_path = roms_path
-        self.roms_base_path = roms_base_path
         self.raw_roms_path = raw_roms_path
         self.rom_name_remove = rom_name_remove
         self.run_patterns_roms_extensions = run_patterns_roms_extensions
@@ -1192,20 +1190,6 @@ class Emulator:
                     print(icmd_parts[3], sep='\r', file=f)
 
 
-    def _add_custom_paths(self, run_pattern_data:dict, run_pattern:str) -> dict:
-        if '{rom_save_states_dir}' in run_pattern:
-            run_pattern_data['rom_save_states_dir'] = os.path.join(
-                self.roms_base_path,
-                'save_states',
-                self.internal_name,
-                os.path.basename(run_pattern_data['rom_path'])
-            )
-
-            os.makedirs(run_pattern_data['rom_save_states_dir'], exist_ok=True)
-
-        return run_pattern_data
-
-
     def run_rom(self, rom_path: str) -> subprocess:
         exe_path = self.get_emulator_executable()
 
@@ -1224,8 +1208,7 @@ class Emulator:
             'exe_path': exe_path,
             'rom_path': rom_path,
             'roms_path': self.get_full_roms_path(),
-            'bios_path': self.bios_path,
-            'roms_base_path': Utils.adjust_to_system_path(self.roms_base_path)
+            'bios_path': self.bios_path
         }
 
         if self.custom_data:
@@ -1241,7 +1224,6 @@ class Emulator:
 
         run_pattern = self._process_extended_pattern(run_pattern, rom_path, run_pattern_data)
         run_pattern_data = Utils.adjust_dict_all_to_system_path(run_pattern_data)
-        run_pattern_data = self._add_custom_paths(run_pattern_data, run_pattern)
         run_command_list = json.loads(run_pattern)
 
         for ipattern_index, ipattern_item in enumerate(run_command_list.copy()):
@@ -1810,7 +1792,6 @@ class MainWindow(QDialog):
             'gui_paths': gui_paths,
             'raw_exe_paths': raw_exe_paths,
             'roms_path': Utils.join_paths(self._roms_base_path, emulator_config_section_data['roms_path']),
-            'roms_base_path': Utils.adjust_to_system_path(self._roms_base_path),
             'raw_roms_path': emulator_config_section_data['roms_path'],
             'bios_path': Utils.adjust_to_system_path(self._bios_path),
             'run_patterns': run_patterns,
