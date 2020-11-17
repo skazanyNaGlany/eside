@@ -1128,7 +1128,8 @@ class Emulator:
 
                 run_pattern_data['unpacked_rom_path'] = unpacked_rom_path
 
-                if os.path.exists(unpacked_rom_path):
+                if os.path.exists(unpacked_rom_path) and len(os.listdir(unpacked_rom_path)) > 0:
+                    # directory exists and is not empty
                     continue
 
                 os.makedirs(unpacked_rom_path, exist_ok=True)
