@@ -104,7 +104,7 @@ show_other_buttons = 1
 show_covers = 1
 
 sort_emulators = 1
-default_emulator = emulator.fs-uae
+default_emulator = emulator.xenia
 
 # some roms has weird names, eg. Smurfs, The (Europe) (En,Fr,De,Es).gb
 # that option will fix it before show in games list
@@ -810,6 +810,9 @@ class Emulator:
         for iextension in roms_extensions:
             for ifile in files:
                 ifile_pathname = str(ifile)
+
+                if os.path.isdir(ifile_pathname):
+                    continue
 
                 if ifile_pathname in roms:
                     continue
