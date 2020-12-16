@@ -415,7 +415,7 @@ exe_paths = rpcs3/rpcs3.exe, rpcs3/rpcs3
 gui_paths =
 roms_path = ps3
 rom_basename_ignore =
-run_pattern0 = ["{exe_path}", "--no-gui", "{rom_path}"]
+run_pattern0 = ["{exe_path}", "{rom_path}"]
 run_pattern0_roms_extensions = EBOOT.BIN
 """
 
